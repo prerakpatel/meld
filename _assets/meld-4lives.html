@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MELD — daily</title>
+<style>
+  :root{
+    --paper:#F4EADA;--paper-deep:#EADCC6;--ink:#2A241D;--ink-soft:#6B5F4F;
+    --clay:#B45C3A;--clay-deep:#934428;--moss:#71794C;--moss-deep:#545C36;
+    --gold:#C2922F;--tile:#FCF7ED;--tile-edge:#D8C9AE;--shadow:rgba(55,40,24,.18);--err:#B14A38;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:radial-gradient(130% 90% at 50% -15%, #FBF4E8 0%, var(--paper) 50%, var(--paper-deep) 100%);
+    color:var(--ink);font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 18px;
+  }
+  .wrap{width:100%;max-width:430px;margin:0 auto;display:flex;flex-direction:column;}
+  header{text-align:center;margin-bottom:14px;}
+  .logo{font-size:30px;letter-spacing:.36em;font-weight:600;margin:0 0 3px;padding-left:.36em;}
+  .tag{font-family:ui-sans-serif,system-ui,sans-serif;font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-soft);margin:0;}
+
+  .status{display:flex;align-items:center;justify-content:space-between;margin:0 auto 12px;width:100%;max-width:360px;font-family:ui-sans-serif,system-ui,sans-serif;}
+  .pips{display:flex;gap:5px;align-items:center;flex-wrap:wrap;}
+  .pip{width:12px;height:12px;border-radius:50%;background:var(--clay);box-shadow:inset 0 -2px 0 rgba(0,0,0,.12);transition:transform .3s,background .3s;}
+  .pip.spent{background:#E0D2BB;transform:scale(.62);}
+  .pip-label{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);margin-left:7px;}
+  .score{font-size:12.5px;letter-spacing:.05em;color:var(--ink-soft);}
+  .score b{color:var(--ink);font-size:18px;font-weight:600;}
+
+  .progress{display:flex;gap:6px;justify-content:center;margin:0 auto 16px;}
+  .seg{width:40px;height:6px;border-radius:3px;background:#E0D2BB;transition:background .35s;}
+  .seg.done{background:var(--moss);}
+  .seg.done.key{background:var(--gold);}
+
+  .board{background:linear-gradient(180deg,#FFFDF8,#F2E9D8);border:1px solid var(--tile-edge);border-radius:18px;padding:18px 16px;box-shadow:0 12px 28px -16px var(--shadow), inset 0 1px 0 #fff;}
+  .slots{display:flex;justify-content:center;align-items:center;gap:9px;}
+  .slot{width:64px;height:60px;border-radius:13px;border:2px dashed var(--tile-edge);background:rgba(255,255,255,.32);display:flex;align-items:center;justify-content:center;transition:border-color .15s,background .15s;}
+  .plus{font-size:20px;color:var(--tile-edge);font-weight:300;}
+  .slot.filled{border-style:solid;border-color:transparent;background:transparent;}
+  .word-preview{text-align:center;height:18px;margin:12px 0 0;font-family:ui-sans-serif,system-ui,sans-serif;font-size:13.5px;letter-spacing:.2em;color:var(--moss-deep);font-weight:700;opacity:0;transition:opacity .2s;}
+  .word-preview.show{opacity:1;}
+
+  .bank{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:18px auto 0;max-width:380px;}
+  .tile{min-width:64px;height:60px;padding:0 14px;border-radius:13px;background:linear-gradient(180deg,var(--tile),#EFE4CE);border:1px solid var(--tile-edge);box-shadow:0 4px 0 #E0D2B8,0 7px 14px -8px var(--shadow);display:flex;align-items:center;justify-content:center;font-size:22px;letter-spacing:.04em;font-weight:600;color:var(--ink);cursor:pointer;user-select:none;transition:transform .12s,box-shadow .12s;}
+  .tile:active{transform:translateY(3px);box-shadow:0 1px 0 #E0D2B8;}
+  .tile.inslot{opacity:.45;pointer-events:none;}
+  .tile.flash{animation:flash .5s ease;}
+  @keyframes flash{0%,100%{box-shadow:0 4px 0 #E0D2B8,0 7px 14px -8px var(--shadow);}40%{box-shadow:0 0 0 3px var(--moss),0 4px 0 #E0D2B8;}}
+
+  .controls{display:flex;gap:9px;justify-content:center;margin-top:18px;}
+  button.act{font-family:ui-sans-serif,system-ui,sans-serif;font-size:12.5px;letter-spacing:.07em;font-weight:600;padding:12px 18px;border-radius:11px;border:1px solid var(--tile-edge);background:#fff;color:var(--ink-soft);cursor:pointer;transition:transform .1s;}
+  button.act:active{transform:translateY(1px);}
+  button.act.primary{background:var(--clay);color:#fff;border-color:var(--clay-deep);box-shadow:0 4px 0 var(--clay-deep);}
+  button.act.primary:active{box-shadow:0 1px 0 var(--clay-deep);}
+  button.act:disabled{opacity:.4;cursor:default;}
+  button.act.ghost{background:transparent;}
+
+  .found{margin:12px auto 0;width:100%;max-width:380px;max-height:132px;overflow-y:auto;}
+  .found-empty{text-align:center;font-family:ui-sans-serif,system-ui,sans-serif;font-size:12px;color:var(--ink-soft);opacity:.7;padding:6px 0 0;letter-spacing:.03em;}
+  .found-list{display:flex;flex-direction:column;gap:6px;}
+  .found-item{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.55);border:1px solid var(--tile-edge);border-radius:11px;padding:10px 14px;animation:flyin .42s cubic-bezier(.2,.9,.3,1.2);}
+  @keyframes flyin{0%{transform:translateY(-12px) scale(.92);opacity:0;}100%{transform:translateY(0) scale(1);opacity:1;}}
+  .found-item .fw{font-size:17px;font-weight:600;letter-spacing:.05em;flex:1;}
+  .found-item .fb{font-family:ui-sans-serif,system-ui,sans-serif;font-size:11px;color:var(--moss-deep);letter-spacing:.03em;}
+  .found-item.key{border-color:var(--gold);background:rgba(194,146,47,.13);}
+  .found-item.key .fb{color:var(--clay-deep);font-weight:700;}
+  .found-item.revealed{opacity:.55;}.found-item.revealed .fb{color:var(--ink-soft);}
+
+  .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--paper);font-family:ui-sans-serif,system-ui,sans-serif;font-size:13px;padding:11px 18px;border-radius:10px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:9;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .toast.err{background:var(--err);}.toast.good{background:var(--moss-deep);}
+
+  .endcard{margin-top:18px;padding:20px;background:linear-gradient(180deg,rgba(194,146,47,.15),rgba(113,121,76,.1));border:1px solid var(--gold);border-radius:16px;text-align:center;animation:flyin .5s ease;}
+  .endcard .big{font-size:20px;font-weight:600;margin:0 0 4px;}
+  .endcard .scoreline{font-family:ui-sans-serif,system-ui,sans-serif;font-size:12.5px;color:var(--ink-soft);margin:0 0 14px;}
+  .sharebox{font-family:ui-monospace,Menlo,monospace;font-size:15px;letter-spacing:.08em;background:rgba(255,255,255,.6);border:1px dashed var(--tile-edge);border-radius:10px;padding:12px;margin:0 0 12px;white-space:pre-line;}
+  .hidden{display:none !important;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 class="logo">MELD</h1>
+    <p class="tag"><span id="tagline">today's words</span></p>
+  </header>
+
+  <div class="status">
+    <div class="pips" id="pips"><span class="pip-label" id="pipsLabel">melds left</span></div>
+    <div class="score">score&nbsp; <b id="score">0</b></div>
+  </div>
+
+  <div class="progress" id="progress"></div>
+
+  <div class="board">
+    <div class="slots">
+      <div class="slot" id="slot0"></div><span class="plus">+</span><div class="slot" id="slot1"></div>
+    </div>
+    <div class="word-preview" id="preview"></div>
+  </div>
+
+  <div class="bank" id="bank"></div>
+
+  <div class="controls">
+    <button class="act ghost" id="hint">Hint (−1)</button>
+    <button class="act" id="clear">Clear</button>
+    <button class="act primary" id="meld" disabled>Meld</button>
+  </div>
+
+  <div class="found">
+    <div class="found-empty" id="foundEmpty">Tap two chunks, then Meld. Find all 5.</div>
+    <div class="found-list" id="foundlist"></div>
+  </div>
+
+  <div class="endcard hidden" id="end">
+    <p class="big" id="endbig">Melded ☕</p>
+    <p class="scoreline" id="endscore"></p>
+    <div class="sharebox" id="sharebox"></div>
+    <button class="act primary" id="copybtn" style="box-shadow:0 4px 0 var(--clay-deep)">Copy result</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const _P="W3siZGF5IjogMSwgInRoZW1lIjogImhlYXJ0aCIsICJwb29sIjogWyJCRVIiLCAiQ0FSIiwgIkNPVCIsICJEUkEiLCAiR09OIiwgIlRJTSIsICJUT04iLCAiV0EiXSwgIndvcmRzIjogW3siYSI6ICJDT1QiLCAiYiI6ICJUT04iLCAidyI6ICJDT1RUT04iLCAia2V5IjogZmFsc2V9LCB7ImEiOiAiQ0FSIiwgImIiOiAiVE9OIiwgInciOiAiQ0FSVE9OIiwgImtleSI6IGZhbHNlfSwgeyJhIjogIkRSQSIsICJiIjogIkdPTiIsICJ3IjogIkRSQUdPTiIsICJrZXkiOiBmYWxzZX0sIHsiYSI6ICJUSU0iLCAiYiI6ICJCRVIiLCAidyI6ICJUSU1CRVIiLCAia2V5IjogZmFsc2V9LCB7ImEiOiAiV0EiLCAiYiI6ICJHT04iLCAidyI6ICJXQUdPTiIsICJrZXkiOiB0cnVlfV19LCB7ImRheSI6IDIsICJ0aGVtZSI6ICJtb3JuaW5nIiwgInBvb2wiOiBbIkFTVCIsICJCQVQiLCAiQlVUIiwgIkNFUiIsICJDT0YiLCAiRUFMIiwgIkZFRSIsICJURVIiLCAiVE8iXSwgIndvcmRzIjogW3siYSI6ICJDT0YiLCAiYiI6ICJGRUUiLCAidyI6ICJDT0ZGRUUiLCAia2V5IjogZmFsc2V9LCB7ImEiOiAiQlVUIiwgImIiOiAiVEVSIiwgInciOiAiQlVUVEVSIiwgImtleSI6IGZhbHNlfSwgeyJhIjogIlRPIiwgImIiOiAiQVNUIiwgInciOiAiVE9BU1QiLCAia2V5IjogdHJ1ZX0sIHsiYSI6ICJDRVIiLCAiYiI6ICJFQUwiLCAidyI6ICJDRVJFQUwiLCAia2V5IjogZmFsc2V9LCB7ImEiOiAiQkFUIiwgImIiOiAiVEVSIiwgInciOiAiQkFUVEVSIiwgImtleSI6IGZhbHNlfV19LCB7ImRheSI6IDMsICJ0aGVtZSI6ICJjb3p5IiwgInBvb2wiOiBbIkFURVIiLCAiQkxBIiwgIkNBTiIsICJETEUiLCAiTE9XIiwgIk5LRVQiLCAiUElMIiwgIlBQRVIiLCAiU0xJIiwgIlNXRSJdLCAid29yZHMiOiBbeyJhIjogIkJMQSIsICJiIjogIk5LRVQiLCAidyI6ICJCTEFOS0VUIiwgImtleSI6IGZhbHNlfSwgeyJhIjogIlBJTCIsICJiIjogIkxPVyIsICJ3IjogIlBJTExPVyIsICJrZXkiOiB0cnVlfSwgeyJhIjogIkNBTiIsICJiIjogIkRMRSIsICJ3IjogIkNBTkRMRSIsICJrZXkiOiBmYWxzZX0sIHsiYSI6ICJTV0UiLCAiYiI6ICJBVEVSIiwgInciOiAiU1dFQVRFUiIsICJrZXkiOiBmYWxzZX0sIHsiYSI6ICJTTEkiLCAiYiI6ICJQUEVSIiwgInciOiAiU0xJUFBFUiIsICJrZXkiOiBmYWxzZX1dfV0=";
+function _decode(){try{return JSON.parse(atob(_P));}catch(e){return[];}}
+const _PUZZLES=_decode();
+// pick "today" by date so everyone sees the same daily puzzle (cycles through the batch)
+const _epoch=new Date(2026,0,1);
+const _dayIdx=Math.floor((Date.now()-_epoch)/(864e5))%_PUZZLES.length;
+const _today=_PUZZLES[(_dayIdx+ _PUZZLES.length)%_PUZZLES.length]||_PUZZLES[0];
+const TILES=_today.pool.slice();
+(function(){var t=document.getElementById && null;})();
+const VALID={};const ORDER=[];
+_today.words.forEach(o=>{const k=o.a+"+"+o.b;VALID[k]={word:o.w,note:o.key?"the keystone — today's cozy word":"",key:!!o.key};ORDER.push(k);});
+const TOTAL=ORDER.length, START=4, PER=20, KEYB=15, HINT=1;
+let slots=[null,null], found=[], melds=START, score=0, over=false, revealed=[];
+const $=id=>document.getElementById(id), bankEl=$('bank'), preview=$('preview'), meldBtn=$('meld');
+
+function buildPips(){const p=$('pips');for(let i=0;i<START;i++){const s=document.createElement('span');s.className='pip';p.insertBefore(s,$('pipsLabel'));}renderPips();}
+function renderPips(){document.querySelectorAll('.pip').forEach((el,i)=>el.classList.toggle('spent',i>=melds));}
+function buildProgress(){const pr=$('progress');ORDER.forEach(k=>{const s=document.createElement('div');s.className='seg';s.dataset.k=k;pr.appendChild(s);});}
+function renderProgress(){document.querySelectorAll('.seg').forEach(el=>{const k=el.dataset.k;if(found.includes(k)||revealed.includes(k)){el.classList.add('done');if(VALID[k].key)el.classList.add('key');}});}
+function buildBank(){TILES.forEach((t,i)=>{const d=document.createElement('div');d.className='tile';d.textContent=t;d.dataset.idx=i;d.addEventListener('click',()=>pick(i));bankEl.appendChild(d);});}
+
+function tileEl(i){return bankEl.querySelector('.tile[data-idx="'+i+'"]');}
+function pick(i){
+  if(over)return;const el=tileEl(i);if(el.classList.contains('inslot'))return;
+  const open=slots.indexOf(null);if(open<0)return;
+  slots[open]={idx:i,txt:TILES[i]};el.classList.add('inslot');renderSlots();
+}
+function renderSlots(){
+  [0,1].forEach(s=>{const slot=$('slot'+s);slot.innerHTML='';
+    if(slots[s]){const t=document.createElement('div');t.className='tile';t.style.cursor='pointer';t.textContent=slots[s].txt;t.addEventListener('click',()=>pull(s));slot.appendChild(t);slot.classList.add('filled');}
+    else slot.classList.remove('filled');});
+  if(slots[0]&&slots[1]){preview.textContent=slots[0].txt+slots[1].txt;preview.classList.add('show');meldBtn.disabled=over;}
+  else{preview.classList.remove('show');meldBtn.disabled=true;}
+}
+function pull(s){if(over||!slots[s])return;tileEl(slots[s].idx).classList.remove('inslot');slots[s]=null;renderSlots();}
+function clearSlots(){slots.forEach(s=>{if(s)tileEl(s.idx).classList.remove('inslot');});slots=[null,null];renderSlots();}
+function toast(m,cls){const t=$('toast');t.textContent=m;t.className='toast show'+(cls?' '+cls:'');clearTimeout(t._t);t._t=setTimeout(()=>t.className='toast',1400);}
+
+function doMeld(){
+  if(over)return;const k=slots.map(s=>s.txt).join('+');
+  if(VALID[k]&&!found.includes(k)){
+    found.push(k);
+    const pts=PER+(VALID[k].key?KEYB:0)+melds;score+=pts;$('score').textContent=score;
+    // flash the tiles (they STAY — reusable across words)
+    slots.forEach(s=>{const e=tileEl(s.idx);e.classList.add('flash');setTimeout(()=>e.classList.remove('flash'),500);});
+    addFound(VALID[k],false);toast('+'+pts+'  '+VALID[k].word+' ✓','good');
+    clearSlots();renderProgress();
+    if(found.length===TOTAL)setTimeout(endGame,500);
+  }else if(found.includes(k)){toast('Already melded that.');clearSlots();}
+  else{melds--;renderPips();toast('Not a word — meld spent.','err');clearSlots();if(melds<=0)setTimeout(endGame,500);}
+}
+function addFound(v,wasRev){
+  $('foundEmpty').classList.add('hidden');
+  const item=document.createElement('div');
+  item.className='found-item'+(v.key?' key':'')+(wasRev?' revealed':'');
+  item.innerHTML='<span class="fw">'+v.word+'</span><span class="fb">'+(wasRev?'missed':v.note)+'</span>';
+  $('foundlist').appendChild(item);
+}
+function hint(){
+  if(over)return;const rem=ORDER.filter(k=>!found.includes(k));
+  if(!rem.length)return;
+  if(melds<=HINT){toast('Not enough melds to hint.','err');return;}
+  toast('Try a word starting with '+rem[0].split('+')[0]);
+  melds-=HINT;renderPips();if(melds<=0)setTimeout(endGame,500);
+}
+function endGame(){
+  if(over)return;over=true;meldBtn.disabled=true;
+  ORDER.forEach(k=>{if(!found.includes(k)){revealed.push(k);addFound(VALID[k],true);}});
+  renderProgress();
+  const perfect=found.length===TOTAL;
+  $('endbig').textContent=perfect?'Melded ☕':'Out of melds';
+  $('endscore').innerHTML='Found <b>'+found.length+'/'+TOTAL+'</b> &middot; score <b>'+score+'</b>'+(perfect?' &middot; '+melds+' to spare':'');
+  $('sharebox').textContent='MELD #1  '+score+'pts\n'+ORDER.map(k=>found.includes(k)?(VALID[k].key?'🟨':'🟩'):'⬜').join('');
+  $('end').classList.remove('hidden');$('end').scrollIntoView({behavior:'smooth',block:'center'});
+}
+$('copybtn').addEventListener('click',()=>navigator.clipboard?.writeText($('sharebox').textContent).then(()=>toast('Copied!','good'),()=>toast('Copy failed','err')));
+meldBtn.addEventListener('click',doMeld);$('clear').addEventListener('click',clearSlots);$('hint').addEventListener('click',hint);
+buildPips();buildProgress();buildBank();renderSlots();
+</script>
+</body>
+</html>
