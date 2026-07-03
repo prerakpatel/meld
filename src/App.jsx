@@ -224,34 +224,29 @@ export default function App() {
 
   return (
     <div className="w-full max-w-[430px] mx-auto flex flex-col h-full max-h-[850px]">
-      <header className="text-center mb-3.5">
-        <h1 className="font-slab text-[42px] tracking-wider font-bold m-0 mb-1 uppercase text-charcoal">MELD</h1>
-        <p className="text-[11px] tracking-[0.22em] uppercase font-bold text-muted m-0">
+      <header className="mb-3 w-full max-w-[360px] mx-auto">
+        <div className="flex items-end justify-between">
+          <div className="text-left">
+            <span className="text-[10px] tracking-[0.16em] uppercase text-muted font-bold mb-1 block">MELDS LEFT</span>
+            <div className="flex gap-1.5 items-center">
+              {Array.from({ length: START_MELDS }).map((_, i) => (
+                <span
+                  key={i}
+                  className={`w-3.5 h-3.5 rounded-full transition-all duration-300 ${i >= melds ? 'bg-[#E0D2BB] scale-[0.62]' : 'bg-coral'}`}
+                ></span>
+              ))}
+            </div>
+          </div>
+          <h1 className="font-slab text-[30px] tracking-wider font-bold m-0 uppercase text-charcoal leading-none">MELD</h1>
+          <div className="text-right">
+            <span className="text-[10px] tracking-[0.16em] uppercase text-muted font-bold mb-1 block">SCORE</span>
+            <div className="text-xl font-bold text-charcoal leading-none">{score}</div>
+          </div>
+        </div>
+        <p className="text-[11px] tracking-[0.22em] uppercase font-bold text-muted m-0 mt-2 text-center">
           <span className="text-coral">#{puzzle.day || 1}</span> &middot; {puzzle.theme || 'FIRESIDE'}
         </p>
       </header>
-
-      <div className="flex items-center justify-between mx-auto mb-4 w-full max-w-[360px]">
-        <div>
-          <span className="text-[10px] tracking-[0.16em] uppercase text-muted font-bold mb-1.5 block">MELDS LEFT</span>
-          <div className="flex gap-1.5 items-center">
-            {Array.from({ length: START_MELDS }).map((_, i) => (
-              <span
-                key={i}
-                className={`w-3.5 h-3.5 rounded-full transition-all duration-300 ${i >= melds ? 'bg-[#E0D2BB] scale-[0.62]' : 'bg-coral'}`}
-              ></span>
-            ))}
-          </div>
-        </div>
-        <div className="text-center">
-          <span className="text-[10px] tracking-[0.16em] uppercase text-muted font-bold mb-1.5 block">STREAK</span>
-          <div className="text-2xl font-bold text-charcoal leading-none">{streak.current_streak}🔥</div>
-        </div>
-        <div className="text-right">
-          <span className="text-[10px] tracking-[0.16em] uppercase text-muted font-bold mb-1.5 block">SCORE</span>
-          <div className="text-2xl font-bold text-charcoal leading-none">{score}</div>
-        </div>
-      </div>
 
       <div className="bg-white border border-tile-edge rounded-[20px] pt-6 px-4 pb-5 flex flex-col items-center mb-4 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
         <div className="flex justify-center items-center gap-3 w-full mb-4">
