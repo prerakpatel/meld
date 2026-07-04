@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef, useLayoutEffect } from 'react';
 import './index.css';
 import { getTodayPuzzle } from './puzzles';
 import { getPlayerId } from './lib/playerId';
@@ -96,6 +96,33 @@ export default function App() {
   // UI State
   const [toast, setToast] = useState({ show: false, msg: '', type: '' });
   const [flashTiles, setFlashTiles] = useState([]);
+
+  // Auto-fit: measure the board's natural height and shrink it to fit the
+  // viewport, however many tile rows today's puzzle needs — the layout
+  // adapts to the content instead of the content being constrained to fit
+  // a fixed number of rows.
+  const wrapRef = useRef(null);
+  const [scale, setScale] = useState(1);
+
+  useLayoutEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+
+    const recompute = () => {
+      const natural = el.scrollHeight;
+      const available = window.innerHeight;
+      setScale(natural > available ? available / natural : 1);
+    };
+
+    recompute();
+    const ro = new ResizeObserver(recompute);
+    ro.observe(el);
+    window.addEventListener('resize', recompute);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', recompute);
+    };
+  }, [puzzle]);
 
   // Toast helper
   const showToast = (msg, type = '') => {
@@ -223,7 +250,12 @@ export default function App() {
   if (!puzzle) return <div>Loading...</div>;
 
   return (
-    <div className="w-full max-w-[430px] mx-auto flex flex-col h-full max-h-[850px]">
+    <>
+    <div
+      ref={wrapRef}
+      className="w-full max-w-[430px] mx-auto flex flex-col"
+      style={{ transform: `scale(${scale})`, transformOrigin: 'top center' }}
+    >
       <header className="mb-3 w-full max-w-[360px] mx-auto">
         <div className="flex items-end justify-between">
           <div className="text-left">
@@ -353,40 +385,41 @@ export default function App() {
           })}
         </div>
       </div>
-
-      {showEndCard && (
-        <>
-          <div className="fixed inset-0 bg-[rgba(237,232,223,0.85)] backdrop-blur-sm z-50 animate-fade-in" onClick={() => setShowEndCard(false)} />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[92%] max-w-[380px] pt-10 px-6 pb-8 bg-tile border border-tile-edge rounded-3xl shadow-[0_20px_40px_rgba(0,0,0,0.1),0_1px_3px_rgba(0,0,0,0.05)] text-center animate-flyin-slow z-100">
-            <button
-              className="absolute top-4 right-4 bg-transparent border-none text-[28px] text-muted cursor-pointer w-9 h-9 flex items-center justify-center rounded-full leading-none transition-all duration-200 hover:bg-[#E0D2BB] hover:text-ink active:scale-90"
-              onClick={() => setShowEndCard(false)}
-              aria-label="Close"
-            >
-              ×
-            </button>
-            <h2 className="font-slab text-[32px] font-bold m-0 mb-3 text-ink">{found.length === totalWords ? 'Melded ☕' : 'Out of melds'}</h2>
-            <p className="text-[15px] text-ink-soft m-0 mb-6">
-              Found <b>{found.length}/{totalWords}</b> &middot; score <b>{score}</b>
-              {found.length === totalWords && ` · ${melds} to spare`}
-            </p>
-            <p className="text-[15px] text-ink-soft m-0 mb-6">
-              Streak: <b>{streak.current_streak}🔥</b> &middot; best <b>{streak.longest_streak}</b>
-            </p>
-            <div className="font-mono text-[15px] tracking-widest bg-white/60 border border-dashed border-tile-edge rounded-xl p-4 mb-6 whitespace-pre-line text-left">
-              {`MELD #${puzzle.day || 1}  ${score}pts\n`}
-              {wordOrder.map(k => found.includes(k) ? (validWords[k].key ? '🟨' : '🟩') : '⬜').join('')}
-            </div>
-            <button className={`${PRIMARY_BTN} font-slab`} onClick={copyResult}>
-              Copy result
-            </button>
-          </div>
-        </>
-      )}
-
-      <div className={`fixed left-1/2 bottom-10 -translate-x-1/2 text-white text-sm font-semibold px-6 py-3 rounded-xl transition-all duration-200 z-90 ${toast.show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5 pointer-events-none'} ${toast.type === 'err' ? 'bg-err' : toast.type === 'good' ? 'bg-moss-deep' : 'bg-charcoal'}`}>
-        {toast.msg}
-      </div>
     </div>
+
+    {showEndCard && (
+      <>
+        <div className="fixed inset-0 bg-[rgba(237,232,223,0.85)] backdrop-blur-sm z-50 animate-fade-in" onClick={() => setShowEndCard(false)} />
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[92%] max-w-[380px] pt-10 px-6 pb-8 bg-tile border border-tile-edge rounded-3xl shadow-[0_20px_40px_rgba(0,0,0,0.1),0_1px_3px_rgba(0,0,0,0.05)] text-center animate-flyin-slow z-100">
+          <button
+            className="absolute top-4 right-4 bg-transparent border-none text-[28px] text-muted cursor-pointer w-9 h-9 flex items-center justify-center rounded-full leading-none transition-all duration-200 hover:bg-[#E0D2BB] hover:text-ink active:scale-90"
+            onClick={() => setShowEndCard(false)}
+            aria-label="Close"
+          >
+            ×
+          </button>
+          <h2 className="font-slab text-[32px] font-bold m-0 mb-3 text-ink">{found.length === totalWords ? 'Melded ☕' : 'Out of melds'}</h2>
+          <p className="text-[15px] text-ink-soft m-0 mb-6">
+            Found <b>{found.length}/{totalWords}</b> &middot; score <b>{score}</b>
+            {found.length === totalWords && ` · ${melds} to spare`}
+          </p>
+          <p className="text-[15px] text-ink-soft m-0 mb-6">
+            Streak: <b>{streak.current_streak}🔥</b> &middot; best <b>{streak.longest_streak}</b>
+          </p>
+          <div className="font-mono text-[15px] tracking-widest bg-white/60 border border-dashed border-tile-edge rounded-xl p-4 mb-6 whitespace-pre-line text-left">
+            {`MELD #${puzzle.day || 1}  ${score}pts\n`}
+            {wordOrder.map(k => found.includes(k) ? (validWords[k].key ? '🟨' : '🟩') : '⬜').join('')}
+          </div>
+          <button className={`${PRIMARY_BTN} font-slab`} onClick={copyResult}>
+            Copy result
+          </button>
+        </div>
+      </>
+    )}
+
+    <div className={`fixed left-1/2 bottom-10 -translate-x-1/2 text-white text-sm font-semibold px-6 py-3 rounded-xl transition-all duration-200 z-90 ${toast.show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5 pointer-events-none'} ${toast.type === 'err' ? 'bg-err' : toast.type === 'good' ? 'bg-moss-deep' : 'bg-charcoal'}`}>
+      {toast.msg}
+    </div>
+    </>
   );
 }
