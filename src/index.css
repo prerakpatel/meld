@@ -27,6 +27,7 @@
   --animate-fade-in: fadeIn 0.4s ease;
   --animate-shake: shake 0.4s ease;
   --animate-pop: pop 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.4);
+  --animate-themein: themein 1.8s ease both;
 }
 
 @layer base {
@@ -125,6 +126,13 @@
 @keyframes pop {
   0% { transform: scale(1.35); }
   100% { transform: scale(1); }
+}
+
+/* The day's theme settles in on first view: coral, then back to quiet. */
+@keyframes themein {
+  0% { opacity: 0; transform: translateY(4px); color: var(--color-coral-deep); }
+  40% { opacity: 1; transform: translateY(0); color: var(--color-coral-deep); }
+  100% { color: inherit; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -49,6 +49,15 @@ export function saveGameState(state) {
   writeJson(GAME_KEY, state);
 }
 
+// True only on the first view of a given day's puzzle — used to play the
+// theme reveal shimmer once, not on every reload.
+const GREET_KEY = 'meld_theme_greet_v1';
+export function shouldGreetTheme(day) {
+  if (readJson(GREET_KEY) === day) return false;
+  writeJson(GREET_KEY, day);
+  return true;
+}
+
 export function hasSeenHowTo() {
   return readJson(HOWTO_KEY) === true;
 }

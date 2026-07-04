@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { loadGameState, saveGameState, loadStats, recordResult } from '../lib/storage';
+import { loadGameState, saveGameState, loadStats, recordResult, shouldGreetTheme } from '../lib/storage';
 import Header from './Header';
 import MeldConsole from './MeldConsole';
 import TileGrid from './TileGrid';
@@ -22,6 +22,8 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
     [puzzle, ephemeral],
   );
   const [stats, setStats] = useState(() => loadStats());
+  // Play the theme's settle-in shimmer only on the first view of a new day.
+  const [themeShimmer] = useState(() => !ephemeral && !!puzzle.theme && shouldGreetTheme(puzzle.day));
 
   // Derived puzzle state
   const { tiles, validWords, wordOrder, totalWords } = useMemo(() => {
@@ -215,6 +217,8 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
           totalMelds={START_MELDS}
           score={score}
           dayNumber={puzzle.day}
+          theme={puzzle.theme}
+          themeShimmer={themeShimmer}
           practice={practice}
           onHelp={onHelp}
           onWordmarkTap={onWordmarkTap}

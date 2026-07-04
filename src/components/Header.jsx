@@ -1,8 +1,9 @@
 const MONTHS = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
 
-export default function Header({ meldsLeft, totalMelds, score, dayNumber, practice, onHelp, onWordmarkTap }) {
+export default function Header({ meldsLeft, totalMelds, score, dayNumber, theme, themeShimmer, practice, onHelp, onWordmarkTap }) {
   const now = new Date();
-  const dateLabel = practice ? 'PRACTICE' : `${MONTHS[now.getMonth()]} ${now.getDate()}`;
+  // The subtitle is the day's theme when it genuinely has one, else the date.
+  const dateLabel = practice ? 'PRACTICE' : theme ?? `${MONTHS[now.getMonth()]} ${now.getDate()}`;
 
   return (
     <header className="w-full relative">
@@ -20,7 +21,8 @@ export default function Header({ meldsLeft, totalMelds, score, dayNumber, practi
         MELD
       </h1>
       <p className="text-[11px] tracking-[0.22em] uppercase font-bold text-muted m-0 mt-1 text-center">
-        <span className="text-coral">#{dayNumber}</span> &middot; {dateLabel}
+        <span className="text-coral">#{dayNumber}</span> &middot;{' '}
+        <span className={themeShimmer ? 'inline-block animate-themein' : ''}>{dateLabel}</span>
       </p>
       <div className="flex items-end justify-between mt-2">
         <div className="text-left">

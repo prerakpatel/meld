@@ -7,7 +7,7 @@ An original game by **Prerak Patel** · © 2026 Prerak Patel. All rights reserve
 ## How it works
 
 - Fully static React app (Vite + Tailwind). No backend, no accounts, no network calls.
-- The year of daily puzzles ships inside the app, lightly obfuscated (`src/data/puzzles.data.js`).
+- 457 daily puzzles (~15 months) ship inside the app, lightly obfuscated (`src/data/puzzles.data.js`), each with hint definitions and a fairness-checked chunk pool. Days with a genuine shared theme carry a label; the rest show the date.
 - Player progress, streaks, and stats live in the browser's localStorage only.
 - The daily puzzle is picked by the player's local calendar date, like Wordle.
 
