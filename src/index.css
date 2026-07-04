@@ -4,7 +4,7 @@
   --color-bone: #EDE8DF;
   --color-ink: #2A241D;
   --color-ink-soft: #6B5F4F;
-  --color-coral: #E8654A;
+  --color-coral: #F8704E;
   --color-coral-deep: #c24d34;
   --color-coral-mist: #FBEAE5;
   --color-moss-deep: #545C36;
@@ -18,6 +18,7 @@
   --color-muted: #a39c93;
 
   --font-slab: 'Zilla Slab', 'Rockwell', serif;
+  --font-display: 'Alfa Slab One', 'Rockwell', serif;
   --font-sans: 'Inter', system-ui, sans-serif;
 
   --animate-flash: flash 0.5s ease;

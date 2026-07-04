@@ -6,7 +6,7 @@ export default function Header({ meldsLeft, totalMelds, score, dayNumber }) {
 
   return (
     <header className="w-full">
-      <h1 className="font-slab text-[length:var(--mast-fs)] tracking-wider font-bold m-0 uppercase text-charcoal leading-none text-center">MELD</h1>
+      <h1 className="font-display text-[length:var(--mast-fs)] tracking-[0.04em] font-normal m-0 uppercase text-charcoal leading-none text-center">MELD</h1>
       <p className="text-[11px] tracking-[0.22em] uppercase font-bold text-muted m-0 mt-1 text-center">
         <span className="text-coral">#{dayNumber}</span> &middot; {dateLabel}
       </p>
