@@ -1,8 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import './index.css';
 import { getTodayPuzzle } from './puzzles';
-import { getPlayerId } from './lib/playerId';
-import { fetchStreak, recordResult } from './lib/streaks';
+import { loadGameState, saveGameState, loadStats, recordResult } from './lib/storage';
 import Header from './components/Header';
 import MeldConsole from './components/MeldConsole';
 import TileGrid from './components/TileGrid';
@@ -16,18 +15,18 @@ const PTS_PER_WORD = 20;
 const PTS_KEYSTONE = 15;
 const HINT_COST = 1;
 
+// When previewing another day in dev (?day=N), don't touch the real saved game.
+const isEphemeralSession = import.meta.env.DEV
+  && typeof window !== 'undefined'
+  && new URLSearchParams(window.location.search).has('day');
+
 export default function App() {
   const puzzle = useMemo(() => getTodayPuzzle(), []);
-  const playerId = useMemo(() => getPlayerId(), []);
-  const [streak, setStreak] = useState({ current_streak: 0, longest_streak: 0 });
-
-  useEffect(() => {
-    let cancelled = false;
-    fetchStreak(playerId).then((s) => {
-      if (!cancelled) setStreak(s);
-    });
-    return () => { cancelled = true; };
-  }, [playerId]);
+  const saved = useMemo(
+    () => (puzzle && !isEphemeralSession ? loadGameState(puzzle.day) : null),
+    [puzzle],
+  );
+  const [stats, setStats] = useState(() => loadStats());
 
   // Derived puzzle state
   const { tiles, validWords, wordOrder, totalWords } = useMemo(() => {
@@ -45,14 +44,14 @@ export default function App() {
     return { tiles: puzzle.pool, validWords, wordOrder, totalWords: wordOrder.length };
   }, [puzzle]);
 
-  // Game state
+  // Game state (restored from the device if today's game is in progress)
   const [slots, setSlots] = useState([null, null]);
-  const [found, setFound] = useState([]);
-  const [melds, setMelds] = useState(START_MELDS);
-  const [score, setScore] = useState(0);
-  const [over, setOver] = useState(false);
+  const [found, setFound] = useState(() => saved?.found ?? []);
+  const [melds, setMelds] = useState(() => saved?.melds ?? START_MELDS);
+  const [score, setScore] = useState(() => saved?.score ?? 0);
+  const [over, setOver] = useState(() => saved?.over ?? false);
   const [showEndCard, setShowEndCard] = useState(false);
-  const [revealed, setRevealed] = useState([]);
+  const [revealed, setRevealed] = useState(() => saved?.revealed ?? []);
 
   // UI state
   const [toast, setToast] = useState({ show: false, msg: '', type: '' });
@@ -61,7 +60,14 @@ export default function App() {
 
   // Active hints: [{ key, tileIdx }] — the starting tile of a hinted word
   // stays coral until that word is found.
-  const [hints, setHints] = useState([]);
+  const [hints, setHints] = useState(() => saved?.hints ?? []);
+
+  // Every meaningful change is saved immediately, so closing the tab or
+  // refreshing resumes the same game (and can't be used to retry a bad day).
+  useEffect(() => {
+    if (!puzzle || isEphemeralSession) return;
+    saveGameState({ day: puzzle.day, found, melds, score, over, revealed, hints });
+  }, [puzzle, found, melds, score, over, revealed, hints]);
 
   const showToast = (msg, type = '') => {
     setToast({ show: true, msg, type });
@@ -95,9 +101,14 @@ export default function App() {
   const handleMeld = () => {
     if (over || !slots[0] || !slots[1]) return;
 
-    const k = slots[0].txt + '+' + slots[1].txt;
+    const joined = slots[0].txt + slots[1].txt;
+    // Accept the intended pair — or any other split that spells one of
+    // today's words, so the player is never punished for being right.
+    const exact = slots[0].txt + '+' + slots[1].txt;
+    const k = validWords[exact] ? exact : wordOrder.find(w => validWords[w].word === joined);
+    setSlots([null, null]);
 
-    if (validWords[k] && !found.includes(k)) {
+    if (k && !found.includes(k)) {
       // Correct meld
       const newFound = [...found, k];
       setFound(newFound);
@@ -109,14 +120,16 @@ export default function App() {
       setTimeout(() => setFlashTiles([]), 500);
 
       showToast(`+${pts}  ${validWords[k].word} ✓`, 'good');
-      setSlots([null, null]);
 
       if (newFound.length === totalWords) {
+        setOver(true); // lock input immediately; the card follows the animation
         setTimeout(() => endGame(true, newFound), 500);
       }
-    } else if (found.includes(k)) {
+    } else if (k) {
       showToast('Already melded that.');
-      setSlots([null, null]);
+    } else if (puzzle.ok?.includes(joined)) {
+      // A real word, just not one of today's five — honesty costs nothing
+      showToast(`${joined} is a word — but not one of today's five.`);
     } else {
       // Wrong meld
       const newMelds = melds - 1;
@@ -124,9 +137,9 @@ export default function App() {
       setShaking(true);
       setTimeout(() => setShaking(false), 400);
       showToast('Not a word — meld spent.', 'err');
-      setSlots([null, null]);
 
       if (newMelds <= 0) {
+        setOver(true); // lock input immediately; the card follows the shake
         setTimeout(() => endGame(false, found), 500);
       }
     }
@@ -161,11 +174,11 @@ export default function App() {
     showToast(`A word starts with ${chunkA} — find its partner.`);
   };
 
-  const endGame = (perfect, currentFound) => {
+  const endGame = (won, currentFound) => {
     setOver(true);
     setShowEndCard(true);
     setRevealed(wordOrder.filter(k => !currentFound.includes(k)));
-    recordResult(playerId, perfect).then(setStreak);
+    if (!isEphemeralSession) setStats(recordResult(won));
   };
 
   const shareText = useMemo(() => {
@@ -263,7 +276,7 @@ export default function App() {
           totalWords={totalWords}
           score={score}
           meldsLeft={melds}
-          streak={streak}
+          stats={stats}
           shareText={shareText}
           onCopy={copyResult}
           onClose={() => setShowEndCard(false)}

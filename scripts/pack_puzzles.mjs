@@ -12,6 +12,34 @@ const out = new URL('../src/data/puzzles.data.js', import.meta.url);
 
 const puzzles = JSON.parse(fs.readFileSync(src, 'utf8'));
 
+// Real-word lookup for the fairness rule: melding a real word that isn't one
+// of the day's answers must never be called "not a word" (and costs nothing).
+// We precompute those per day here so the app doesn't ship a dictionary.
+const dict = new Set();
+for (const p of ['/usr/share/dict/words', new URL('./common_words_10k.txt', import.meta.url)]) {
+  if (!fs.existsSync(p)) continue;
+  for (const w of fs.readFileSync(p, 'utf8').split('\n')) {
+    const word = w.trim();
+    if (/^[a-z]{5,}$/.test(word)) dict.add(word);
+  }
+}
+if (dict.size < 10000) throw new Error('dictionary sources missing — refusing to pack without the real-word list');
+
+for (const d of puzzles) {
+  const intendedPairs = new Set(d.words.map((w) => w.a + '+' + w.b));
+  const intendedWords = new Set(d.words.map((w) => w.w));
+  const ok = new Set();
+  for (const a of d.pool) {
+    for (const b of d.pool) {
+      if (a === b) continue;
+      const joined = a + b;
+      if (intendedPairs.has(a + '+' + b) || intendedWords.has(joined)) continue;
+      if (dict.has(joined.toLowerCase())) ok.add(joined);
+    }
+  }
+  d.ok = [...ok].sort();
+}
+
 // Minimal sanity gate so a bad generator run can never ship.
 for (const d of puzzles) {
   if (d.words.length !== 5) throw new Error(`day ${d.day}: needs 5 words`);

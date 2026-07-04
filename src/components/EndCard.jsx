@@ -1,6 +1,6 @@
 import { PRIMARY_BTN } from './styles';
 
-export default function EndCard({ won, foundCount, totalWords, score, meldsLeft, streak, shareText, onCopy, onClose }) {
+export default function EndCard({ won, foundCount, totalWords, score, meldsLeft, stats, shareText, onCopy, onClose }) {
   return (
     <>
       <div className="fixed inset-0 bg-[rgba(237,232,223,0.85)] backdrop-blur-sm z-50 animate-fade-in" onClick={onClose} />
@@ -21,7 +21,7 @@ export default function EndCard({ won, foundCount, totalWords, score, meldsLeft,
         <div className="font-slab text-[44px] font-bold leading-none text-coral mb-1">{score}</div>
         <p className="text-[11px] tracking-[0.16em] uppercase text-muted font-bold m-0 mb-5">points</p>
         <p className="text-[14px] text-ink-soft m-0 mb-5">
-          Streak <b>{streak.current_streak}🔥</b> &middot; best <b>{streak.longest_streak}</b>
+          Streak <b>{stats.currentStreak}🔥</b> &middot; best <b>{stats.longestStreak}</b>
         </p>
         <div className="font-mono text-[15px] tracking-widest bg-white/60 border border-dashed border-tile-edge rounded-xl p-3.5 mb-5 whitespace-pre-line text-left">
           {shareText}

@@ -25,8 +25,10 @@ export function getTodayPuzzle(now = new Date()) {
   const puzzles = allPuzzles();
   const count = puzzles.length;
 
-  // Dev/testing override: ?day=N picks that day directly (wraps like the real rotation)
-  const dayParam = typeof window !== 'undefined'
+  // Dev-only testing override: ?day=N picks that day directly (wraps like
+  // the real rotation). Stripped from production builds so players can't
+  // peek at other days by editing the URL.
+  const dayParam = import.meta.env.DEV && typeof window !== 'undefined'
     ? new URLSearchParams(window.location.search).get('day')
     : null;
 
