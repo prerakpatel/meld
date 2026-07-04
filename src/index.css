@@ -6,9 +6,13 @@
   --color-ink-soft: #6B5F4F;
   --color-coral: #E8654A;
   --color-coral-deep: #c24d34;
+  --color-coral-mist: #FBEAE5;
   --color-moss-deep: #545C36;
+  --color-moss-mist: #EFF6E9;
   --color-tile: #FCF7ED;
   --color-tile-edge: #D8C9AE;
+  --color-paper-deep: #F5F2EB;
+  --color-paper-line: #E6E1D6;
   --color-err: #B14A38;
   --color-charcoal: #1a1a1a;
   --color-muted: #a39c93;
@@ -20,11 +24,32 @@
   --animate-flyin: flyin 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.2);
   --animate-flyin-slow: flyin 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2);
   --animate-fade-in: fadeIn 0.4s ease;
+  --animate-shake: shake 0.4s ease;
+  --animate-pop: pop 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.4);
 }
 
 @layer base {
   * {
     -webkit-tap-highlight-color: transparent;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  /* Pinned to the visual viewport: the page itself can never scroll or
+     rubber-band; the game lays itself out inside whatever height exists. */
+  body {
+    position: fixed;
+    inset: 0;
+    margin: 0;
+    overflow: hidden;
+    overscroll-behavior: none;
+    background: var(--color-bone);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
   }
 }
 
@@ -47,4 +72,25 @@
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-7px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(3px); }
+}
+
+@keyframes pop {
+  0% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

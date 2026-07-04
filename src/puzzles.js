@@ -1,13 +1,29 @@
-import { supabase } from './lib/supabaseClient';
+import { PUZZLES_B64 } from './data/puzzles.data';
 
-const ROTATION_EPOCH = new Date(2026, 0, 1);
+// The puzzle rotation starts counting from this local calendar date (day 1).
+const ROTATION_EPOCH = { year: 2026, month: 0, day: 1 };
 
-export async function getTodayPuzzle() {
-  const { count, error: countError } = await supabase
-    .from('puzzles')
-    .select('*', { count: 'exact', head: true });
+let cache = null;
+function allPuzzles() {
+  if (!cache) cache = JSON.parse(atob(PUZZLES_B64));
+  return cache;
+}
 
-  if (countError || !count) return null;
+// Whole calendar days between the epoch and the player's local date.
+// Computed from date *components* (not raw milliseconds) so daylight-saving
+// shifts can never make a day appear twice or get skipped.
+function daysSinceEpoch(now) {
+  const a = Date.UTC(ROTATION_EPOCH.year, ROTATION_EPOCH.month, ROTATION_EPOCH.day);
+  const b = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.round((b - a) / 864e5);
+}
+
+// The puzzle for the player's current local calendar day (same for everyone
+// in the same timezone, like Wordle). Cycles through the batch when the
+// rotation runs past the last day.
+export function getTodayPuzzle(now = new Date()) {
+  const puzzles = allPuzzles();
+  const count = puzzles.length;
 
   // Dev/testing override: ?day=N picks that day directly (wraps like the real rotation)
   const dayParam = typeof window !== 'undefined'
@@ -18,17 +34,8 @@ export async function getTodayPuzzle() {
   if (dayParam !== null && dayParam !== '' && !Number.isNaN(Number(dayParam))) {
     day = ((Number(dayParam) - 1) % count + count) % count + 1;
   } else {
-    // Pick "today" by date so everyone sees the same daily puzzle (cycles through the batch)
-    const daysSinceEpoch = Math.floor((Date.now() - ROTATION_EPOCH.getTime()) / 864e5);
-    day = ((daysSinceEpoch % count) + count) % count + 1;
+    day = ((daysSinceEpoch(now) % count) + count) % count + 1;
   }
 
-  const { data, error } = await supabase
-    .from('puzzles')
-    .select('day, theme, pool, words')
-    .eq('day', day)
-    .single();
-
-  if (error) return null;
-  return data;
+  return puzzles.find((p) => p.day === day) ?? null;
 }
