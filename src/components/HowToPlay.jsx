@@ -39,7 +39,7 @@ export default function HowToPlay({ onClose }) {
             <span className="inline-flex items-center gap-1 align-middle text-coral"><KeyIcon className="inline-block" /></span>{' '}
             One word is the <b>keystone</b> — finding it is worth extra points.
           </Rule>
-          <Rule>Stuck? A <b>hint</b> places a word&rsquo;s first chunk for you and keeps it glowing. It costs 1 meld.</Rule>
+          <Rule>Stuck? A <b>hint</b> reveals a clue — the definition of one unfound word. It costs 1 meld.</Rule>
         </ul>
 
         <p className="text-[12px] text-muted m-0 mb-3 text-center">A new puzzle at midnight — the same five words for everyone.</p>

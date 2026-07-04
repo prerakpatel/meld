@@ -22,11 +22,10 @@ function wrapDay(n, count) {
   return ((n - 1) % count + count) % count + 1;
 }
 
-// Practice mode (?practice, or ?practice=N): a random puzzle that never
-// touches the real daily game, saved progress, or the streak.
-export function isPracticeSession() {
-  return typeof window !== 'undefined'
-    && new URLSearchParams(window.location.search).has('practice');
+// A random puzzle for the hidden creator-practice mode (see App.jsx).
+export function getRandomPuzzle() {
+  const puzzles = allPuzzles();
+  return puzzles[Math.floor(Math.random() * puzzles.length)] ?? null;
 }
 
 // The puzzle for the player's current local calendar day (same for everyone
@@ -35,25 +34,16 @@ export function isPracticeSession() {
 export function getTodayPuzzle(now = new Date()) {
   const puzzles = allPuzzles();
   const count = puzzles.length;
-  const params = typeof window !== 'undefined'
-    ? new URLSearchParams(window.location.search)
-    : new URLSearchParams();
 
-  let day;
-  const practiceParam = params.get('practice');
   // Dev-only testing override: ?day=N picks that day directly. Stripped from
   // production builds so players can't peek at other days by editing the URL.
-  const dayParam = import.meta.env.DEV ? params.get('day') : null;
+  const dayParam = import.meta.env.DEV && typeof window !== 'undefined'
+    ? new URLSearchParams(window.location.search).get('day')
+    : null;
 
-  if (practiceParam !== null) {
-    day = /^\d+$/.test(practiceParam)
-      ? wrapDay(Number(practiceParam), count)
-      : Math.floor(Math.random() * count) + 1;
-  } else if (dayParam !== null && dayParam !== '' && !Number.isNaN(Number(dayParam))) {
-    day = wrapDay(Number(dayParam), count);
-  } else {
-    day = wrapDay(daysSinceEpoch(now) + 1, count);
-  }
+  const day = dayParam !== null && dayParam !== '' && !Number.isNaN(Number(dayParam))
+    ? wrapDay(Number(dayParam), count)
+    : wrapDay(daysSinceEpoch(now) + 1, count);
 
   return puzzles.find((p) => p.day === day) ?? null;
 }

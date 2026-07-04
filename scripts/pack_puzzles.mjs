@@ -12,6 +12,16 @@ const out = new URL('../src/data/puzzles.data.js', import.meta.url);
 
 const puzzles = JSON.parse(fs.readFileSync(src, 'utf8'));
 
+// Hint clues: short definitions built offline by build_definitions.mjs.
+// Words without one fall back to a starts-with clue in the app.
+const defsPath = new URL('./definitions.json', import.meta.url);
+const definitions = fs.existsSync(defsPath) ? JSON.parse(fs.readFileSync(defsPath, 'utf8')) : {};
+for (const d of puzzles) {
+  for (const w of d.words) {
+    if (definitions[w.w]) w.d = definitions[w.w];
+  }
+}
+
 // Real-word lookup for the fairness rule: melding a real word that isn't one
 // of the day's answers must never be called "not a word" (and costs nothing).
 // We precompute those per day here so the app doesn't ship a dictionary.
@@ -50,7 +60,11 @@ for (const d of puzzles) {
   }
 }
 
-const b64 = Buffer.from(JSON.stringify(puzzles), 'utf8').toString('base64');
+const json = JSON.stringify(puzzles);
+// The app decodes with atob(), which is ASCII-only — refuse to ship anything
+// that would silently corrupt.
+if (!/^[\x20-\x7E]*$/.test(json)) throw new Error('puzzle data contains non-ASCII characters — atob() would corrupt them');
+const b64 = Buffer.from(json, 'utf8').toString('base64');
 
 fs.mkdirSync(new URL('../src/data/', import.meta.url), { recursive: true });
 fs.writeFileSync(

@@ -1,6 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- MELD tile: coral letterpress chunk with the angled hard shadow -->
+  <!-- One MELD tile made of two chunk-halves: a hairline seam runs behind
+       the M — the word already melded across its two pieces -->
   <rect x="9" y="13" width="50" height="46" rx="13" fill="#1a1a1a"/>
   <rect x="4" y="6" width="50" height="46" rx="13" fill="#F8704E" stroke="#1a1a1a" stroke-width="4"/>
+  <line x1="29" y1="8" x2="29" y2="50" stroke="#c24d34" stroke-width="2.5"/>
   <text x="29" y="41" text-anchor="middle" font-family="'Alfa Slab One','Rockwell','Zilla Slab',serif" font-weight="900" font-size="30" fill="#1a1a1a">M</text>
 </svg>

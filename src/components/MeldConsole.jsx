@@ -16,7 +16,7 @@ function Slot({ chunk, onPull }) {
   );
 }
 
-export default function MeldConsole({ slots, onPull, onMeld, disabled, shaking }) {
+export default function MeldConsole({ slots, clue, onPull, onMeld, disabled, shaking }) {
   return (
     <div className={`bg-white border border-paper-line rounded-[20px] pt-3.5 px-3.5 pb-3.5 flex flex-col items-center shadow-[0_4px_20px_rgba(0,0,0,0.03)] ${shaking ? 'animate-shake' : ''}`}>
       <div className="flex justify-center items-center gap-2.5 w-full mb-1.5">
@@ -24,10 +24,14 @@ export default function MeldConsole({ slots, onPull, onMeld, disabled, shaking }
         <span className="w-7 h-7 shrink-0 rounded-full bg-white border border-paper-line flex items-center justify-center text-lg text-[#c9c1b1] font-semibold leading-none">+</span>
         <Slot chunk={slots[1]} onPull={() => onPull(1)} />
       </div>
-      <div className="text-[13px] text-muted mb-2 text-center h-5 flex items-center justify-center">
+      <div className="text-[13px] text-muted mb-2 text-center min-h-5 flex items-center justify-center w-full min-w-0">
         {slots[0] && slots[1] ? (
           <span className="text-moss-deep font-bold tracking-widest font-slab">
             {slots[0].txt + slots[1].txt}
+          </span>
+        ) : clue ? (
+          <span className="text-[12px] leading-snug text-coral-deep italic line-clamp-2 px-1">
+            💡 {clue}
           </span>
         ) : (
           'tap two chunks to meld'

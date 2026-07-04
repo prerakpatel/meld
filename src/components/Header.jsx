@@ -1,6 +1,6 @@
 const MONTHS = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
 
-export default function Header({ meldsLeft, totalMelds, score, dayNumber, practice, onHelp }) {
+export default function Header({ meldsLeft, totalMelds, score, dayNumber, practice, onHelp, onWordmarkTap }) {
   const now = new Date();
   const dateLabel = practice ? 'PRACTICE' : `${MONTHS[now.getMonth()]} ${now.getDate()}`;
 
@@ -13,7 +13,12 @@ export default function Header({ meldsLeft, totalMelds, score, dayNumber, practi
       >
         <span className="material-symbols-rounded text-[24px] leading-none" aria-hidden="true">help</span>
       </button>
-      <h1 className="font-display text-[length:var(--mast-fs)] tracking-[0.04em] font-normal m-0 uppercase text-charcoal leading-none text-center">MELD</h1>
+      <h1
+        className="font-display text-[length:var(--mast-fs)] tracking-[0.04em] font-normal m-0 uppercase text-charcoal leading-none text-center select-none"
+        onClick={onWordmarkTap}
+      >
+        MELD
+      </h1>
       <p className="text-[11px] tracking-[0.22em] uppercase font-bold text-muted m-0 mt-1 text-center">
         <span className="text-coral">#{dayNumber}</span> &middot; {dateLabel}
       </p>

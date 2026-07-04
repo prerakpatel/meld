@@ -22,10 +22,11 @@ An original game by **Prerak Patel** · © 2026 Prerak Patel. All rights reserve
 
 ## Maintenance: topping up puzzles
 
-Puzzles are generated offline by `scripts/generate_puzzles.mjs` and packed by `scripts/pack_puzzles.mjs`. When the rotation nears its end (or once a year), regenerate and repack:
+Puzzles are generated offline by `scripts/generate_puzzles.mjs`, hint clues by `scripts/build_definitions.mjs` (WordNet, offline), and both are packed by `scripts/pack_puzzles.mjs`. When the rotation nears its end (or once a year), regenerate and repack:
 
 ```
 node scripts/generate_puzzles.mjs
+node scripts/build_definitions.mjs
 npm run puzzles:pack
 ```
 
@@ -33,5 +34,5 @@ Then commit and push — Vercel redeploys automatically.
 
 ## Testing tricks
 
-- `?practice` on the URL — plays a random puzzle without touching the real daily game, saved progress, or streak. Add a number (`?practice=42`) for a specific one. Works in production; intended for the creator.
+- **Creator practice mode** — tap the MELD wordmark 7 times quickly to toggle unlimited random puzzles. Nothing in the UI or URL reveals it, and it never touches the real daily game, saved progress, or streak. Tap 7 times again to return to today.
 - `?day=N` — jump to a specific day. **Dev builds only**; does nothing in production.
