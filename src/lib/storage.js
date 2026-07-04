@@ -5,6 +5,7 @@
 
 const GAME_KEY = 'meld_game_v1';
 const STATS_KEY = 'meld_stats_v1';
+const HOWTO_KEY = 'meld_howto_seen_v1';
 
 const DEFAULT_STATS = {
   currentStreak: 0,
@@ -46,6 +47,14 @@ export function loadGameState(day) {
 
 export function saveGameState(state) {
   writeJson(GAME_KEY, state);
+}
+
+export function hasSeenHowTo() {
+  return readJson(HOWTO_KEY) === true;
+}
+
+export function markHowToSeen() {
+  writeJson(HOWTO_KEY, true);
 }
 
 export function loadStats() {

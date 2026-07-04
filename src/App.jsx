@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import './index.css';
-import { getTodayPuzzle } from './puzzles';
-import { loadGameState, saveGameState, loadStats, recordResult } from './lib/storage';
+import { getTodayPuzzle, isPracticeSession } from './puzzles';
+import { loadGameState, saveGameState, loadStats, recordResult, hasSeenHowTo, markHowToSeen } from './lib/storage';
+import HowToPlay from './components/HowToPlay';
 import Header from './components/Header';
 import MeldConsole from './components/MeldConsole';
 import TileGrid from './components/TileGrid';
@@ -15,10 +16,13 @@ const PTS_PER_WORD = 20;
 const PTS_KEYSTONE = 15;
 const HINT_COST = 1;
 
-// When previewing another day in dev (?day=N), don't touch the real saved game.
-const isEphemeralSession = import.meta.env.DEV
+// Practice games and dev day-previews never touch the real saved game or streak.
+const isPractice = isPracticeSession();
+const isEphemeralSession = isPractice || (
+  import.meta.env.DEV
   && typeof window !== 'undefined'
-  && new URLSearchParams(window.location.search).has('day');
+  && new URLSearchParams(window.location.search).has('day')
+);
 
 export default function App() {
   const puzzle = useMemo(() => getTodayPuzzle(), []);
@@ -27,6 +31,12 @@ export default function App() {
     [puzzle],
   );
   const [stats, setStats] = useState(() => loadStats());
+  const [showHelp, setShowHelp] = useState(() => !hasSeenHowTo());
+
+  const closeHelp = () => {
+    setShowHelp(false);
+    markHowToSeen();
+  };
 
   // Derived puzzle state
   const { tiles, validWords, wordOrder, totalWords } = useMemo(() => {
@@ -218,7 +228,14 @@ export default function App() {
           paddingBottom: 'calc(10px + env(safe-area-inset-bottom))',
         }}
       >
-        <Header meldsLeft={melds} totalMelds={START_MELDS} score={score} dayNumber={puzzle.day} />
+        <Header
+          meldsLeft={melds}
+          totalMelds={START_MELDS}
+          score={score}
+          dayNumber={puzzle.day}
+          practice={isPractice}
+          onHelp={() => setShowHelp(true)}
+        />
 
         {/* Leftover height splits 1:2 above/below the play block (the console
             rides high, near the header), and the block's own rhythm scales
@@ -252,9 +269,16 @@ export default function App() {
                 </button>
               </>
             ) : (
-              <button className={`${PRIMARY_BTN} font-slab px-6 py-2.5 text-[15px] max-w-[220px]`} onClick={() => setShowEndCard(true)}>
-                Show result
-              </button>
+              <>
+                <button className={`${PRIMARY_BTN} px-6 py-2.5 text-[15px] max-w-[220px]`} onClick={() => setShowEndCard(true)}>
+                  Show result
+                </button>
+                {isPractice && (
+                  <button className={SECONDARY_BTN} onClick={() => { window.location.href = '?practice'; }}>
+                    New puzzle
+                  </button>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -268,6 +292,8 @@ export default function App() {
           hintedKeys={hints.map(h => h.key)}
         />
       </div>
+
+      {showHelp && <HowToPlay onClose={closeHelp} />}
 
       {showEndCard && (
         <EndCard

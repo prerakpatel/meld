@@ -1,16 +1,37 @@
-# React + Vite
+# MELD
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A cozy daily word game — meld two letter-chunks into a word, find all five of the day's words, including the hidden **keystone**. Same puzzle for everyone, every day.
 
-Currently, two official plugins are available:
+An original game by **Prerak Patel** · © 2026 Prerak Patel. All rights reserved.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## How it works
 
-## React Compiler
+- Fully static React app (Vite + Tailwind). No backend, no accounts, no network calls.
+- The year of daily puzzles ships inside the app, lightly obfuscated (`src/data/puzzles.data.js`).
+- Player progress, streaks, and stats live in the browser's localStorage only.
+- The daily puzzle is picked by the player's local calendar date, like Wordle.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Commands
 
-## Expanding the Oxlint configuration
+| Command | What it does |
+|---|---|
+| `npm run dev` | Local dev server |
+| `npm run build` | Production build (what Vercel runs) |
+| `npm run lint` | Lint |
+| `npm run puzzles:pack` | Re-bundle `scripts/generated_puzzles.json` into the app (run after regenerating puzzles) |
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+## Maintenance: topping up puzzles
+
+Puzzles are generated offline by `scripts/generate_puzzles.mjs` and packed by `scripts/pack_puzzles.mjs`. When the rotation nears its end (or once a year), regenerate and repack:
+
+```
+node scripts/generate_puzzles.mjs
+npm run puzzles:pack
+```
+
+Then commit and push — Vercel redeploys automatically.
+
+## Testing tricks
+
+- `?practice` on the URL — plays a random puzzle without touching the real daily game, saved progress, or streak. Add a number (`?practice=42`) for a specific one. Works in production; intended for the creator.
+- `?day=N` — jump to a specific day. **Dev builds only**; does nothing in production.
