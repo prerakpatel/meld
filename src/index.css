@@ -38,6 +38,7 @@
      iOS Safari and Android Chrome). The clamp minimums equal the iPhone SE
      layout; the maximums fit an iPhone 16 and bigger without ballooning. */
   :root {
+    --mast-fs: 30px;       /* MELD wordmark */
     --slot-h: 3.5rem;      /* meld slots */
     --tile-h: 3.25rem;     /* bank tiles */
     --tile-fs: 17px;       /* bank tile lettering */
@@ -48,12 +49,26 @@
 
   @supports (height: 1svh) {
     :root {
+      --mast-fs: clamp(24px, 4.2svh, 32px);
       --slot-h: clamp(3.5rem, 9.5svh, 4.75rem);
       --tile-h: clamp(3.25rem, 9svh, 4.5rem);
       --tile-fs: clamp(17px, 3svh, 22px);
       --btn-h: clamp(3rem, 7.2svh, 3.5rem);
       --seed-h: clamp(2rem, 5.4svh, 2.75rem);
       --gap-y: clamp(0.625rem, 2.8svh, 1.75rem);
+    }
+  }
+
+  /* Short screens (iPhone SE with browser bars): step the minimums down one
+     notch so the richer header still fits without scrolling. */
+  @media (max-height: 620px) {
+    :root {
+      --slot-h: 3.25rem;
+      --tile-h: 3rem;
+      --tile-fs: 16px;
+      --btn-h: 2.75rem;
+      --seed-h: 1.875rem;
+      --gap-y: 0.5rem;
     }
   }
 

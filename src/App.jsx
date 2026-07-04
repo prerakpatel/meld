@@ -59,6 +59,10 @@ export default function App() {
   const [flashTiles, setFlashTiles] = useState([]);
   const [shaking, setShaking] = useState(false);
 
+  // Active hints: [{ key, tileIdx }] — the starting tile of a hinted word
+  // stays coral until that word is found.
+  const [hints, setHints] = useState([]);
+
   const showToast = (msg, type = '') => {
     setToast({ show: true, msg, type });
     setTimeout(() => setToast(t => ({ ...t, show: false })), 1600);
@@ -128,18 +132,33 @@ export default function App() {
     }
   };
 
+  // A hint drops the starting chunk of an unfound word into the first slot
+  // and keeps that tile (and the word's ledger seed) coral until it's solved.
   const handleHint = () => {
     if (over) return;
     const rem = wordOrder.filter(k => !found.includes(k));
     if (!rem.length) return;
+
+    // Hint plain words first; the keystone stays the day's payoff and is
+    // only hinted when it's the last word left.
+    const unhinted = rem.filter(k => !hints.some(h => h.key === k));
+    const target = unhinted.find(k => !validWords[k].key) ?? unhinted[0];
+    if (!target) {
+      showToast('Your hint is already glowing in the bank.');
+      return;
+    }
 
     if (melds <= HINT_COST) {
       showToast('Not enough melds to hint.', 'err');
       return;
     }
 
-    showToast('Try a word starting with ' + rem[0].split('+')[0]);
+    const chunkA = target.split('+')[0];
+    const tileIdx = tiles.indexOf(chunkA);
+    setHints(h => [...h, { key: target, tileIdx }]);
+    setSlots([{ idx: tileIdx, txt: chunkA }, null]);
     setMelds(melds - HINT_COST);
+    showToast(`A word starts with ${chunkA} — find its partner.`);
   };
 
   const endGame = (perfect, currentFound) => {
@@ -188,10 +207,10 @@ export default function App() {
       >
         <Header meldsLeft={melds} totalMelds={START_MELDS} score={score} dayNumber={puzzle.day} />
 
-        {/* Leftover height splits 2:3 above/below the play block (slightly
-            top-weighted reads better than dead-centering), and the block's
-            own rhythm scales with the viewport via --gap-y. */}
-        <div className="flex-[2] min-h-2.5" />
+        {/* Leftover height splits 1:2 above/below the play block (the console
+            rides high, near the header), and the block's own rhythm scales
+            with the viewport via --gap-y. */}
+        <div className="flex-1 min-h-2.5" />
         <div className="flex flex-col gap-(--gap-y)">
           <MeldConsole
             slots={slots}
@@ -205,6 +224,7 @@ export default function App() {
             tiles={tiles}
             selectedIdxs={slots.filter(Boolean).map(s => s.idx)}
             flashIdxs={flashTiles}
+            hintedIdxs={hints.filter(h => !found.includes(h.key)).map(h => h.tileIdx)}
             onPick={handlePick}
           />
 
@@ -225,9 +245,15 @@ export default function App() {
             )}
           </div>
         </div>
-        <div className="flex-[3] min-h-2.5" />
+        <div className="flex-[2] min-h-2.5" />
 
-        <TodaysFive wordOrder={wordOrder} validWords={validWords} found={found} revealed={revealed} />
+        <TodaysFive
+          wordOrder={wordOrder}
+          validWords={validWords}
+          found={found}
+          revealed={revealed}
+          hintedKeys={hints.map(h => h.key)}
+        />
       </div>
 
       {showEndCard && (
