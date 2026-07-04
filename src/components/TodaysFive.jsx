@@ -5,22 +5,29 @@ import { KeyIcon } from './icons';
 // keystone seed carries the key icon and blooms in coral. A hinted word's
 // seed glows coral so the player knows where their hint lives. On a loss,
 // missed words appear as muted pills so the player is never left wondering.
-function LedgerSlot({ number, word, isKey, state, hinted }) {
+function LedgerSlot({ number, word, isKey, state, hinted, onSeatTap }) {
   if (state === 'hidden') {
+    // Dashed hollow circles read as empty seats, not buttons; a tap still
+    // gets a friendly explanation instead of a dead press.
     return (
-      <span className={`h-(--seed-h) min-w-(--seed-h) px-0 rounded-full border flex items-center justify-center ${
-        hinted
-          ? 'bg-coral-mist border-coral'
-          : isKey
-            ? 'bg-coral-mist border-[#F0C9BE]'
-            : 'bg-paper-deep border-paper-line'
-      }`}>
+      <button
+        type="button"
+        className={`h-(--seed-h) min-w-(--seed-h) px-0 rounded-full border border-dashed bg-transparent flex items-center justify-center cursor-default ${
+          hinted
+            ? 'border-coral'
+            : isKey
+              ? 'border-[#F0C9BE]'
+              : 'border-[#cfc7b8]'
+        }`}
+        onClick={() => onSeatTap(isKey)}
+        aria-label={isKey ? 'Seat for the keystone word' : `Seat for word ${number}`}
+      >
         {isKey ? (
-          <span className="text-coral"><KeyIcon /></span>
+          <span className="text-coral opacity-80"><KeyIcon /></span>
         ) : (
           <span className={`text-[11px] font-bold ${hinted ? 'text-coral-deep' : 'text-muted'}`}>{number}</span>
         )}
-      </span>
+      </button>
     );
   }
 
@@ -43,7 +50,7 @@ function LedgerSlot({ number, word, isKey, state, hinted }) {
   );
 }
 
-export default function TodaysFive({ wordOrder, validWords, found, revealed, hintedKeys }) {
+export default function TodaysFive({ wordOrder, validWords, found, revealed, hintedKeys, onSeatTap }) {
   const foundCount = wordOrder.filter((k) => found.includes(k)).length;
 
   return (
@@ -64,6 +71,7 @@ export default function TodaysFive({ wordOrder, validWords, found, revealed, hin
               isKey={validWords[k]?.key}
               state={isFound ? 'found' : isMissed ? 'missed' : 'hidden'}
               hinted={hintedKeys.includes(k) && !isFound}
+              onSeatTap={onSeatTap}
             />
           );
         })}

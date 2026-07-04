@@ -277,6 +277,9 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
           found={found}
           revealed={revealed}
           hintedKeys={hints.map(h => h.key)}
+          onSeatTap={(isKey) => showToast(isKey
+            ? 'The keystone’s seat — find it for a bonus.'
+            : 'One of today’s five lives here — meld it to fill the seat.')}
         />
       </div>
 

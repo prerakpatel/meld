@@ -1,7 +1,9 @@
 import { PUZZLES_B64 } from './data/puzzles.data';
 
 // The puzzle rotation starts counting from this local calendar date (day 1).
-const ROTATION_EPOCH = { year: 2026, month: 0, day: 1 };
+// Set to the day the regenerated content went live; bump to the public
+// launch date if #1 should coincide with launch.
+const ROTATION_EPOCH = { year: 2026, month: 6, day: 4 };
 
 let cache = null;
 function allPuzzles() {

@@ -1,4 +1,5 @@
 import { PRIMARY_BTN } from './styles';
+import { LightbulbIcon } from './icons';
 
 const TILE_INSLOT = 'w-full h-full rounded-xl bg-white border-2 border-charcoal flex items-center justify-center text-xl font-bold text-charcoal cursor-pointer select-none font-slab shadow-[2px_3px_0_#1a1a1a]';
 
@@ -30,8 +31,9 @@ export default function MeldConsole({ slots, clue, onPull, onMeld, disabled, sha
             {slots[0].txt + slots[1].txt}
           </span>
         ) : clue ? (
-          <span className="text-[12px] leading-snug text-coral-deep italic line-clamp-2 px-1">
-            💡 {clue}
+          <span className="w-full min-h-8 rounded-lg bg-coral-mist border border-[#F0C9BE] flex items-center justify-center gap-1.5 px-2.5 py-1 text-coral-deep">
+            <LightbulbIcon />
+            <span className="text-[12px] leading-snug font-semibold line-clamp-2 text-left">{clue}</span>
           </span>
         ) : (
           'tap two chunks to meld'
