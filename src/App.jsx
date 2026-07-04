@@ -188,9 +188,11 @@ export default function App() {
       >
         <Header meldsLeft={melds} totalMelds={START_MELDS} score={score} dayNumber={puzzle.day} />
 
-        {/* The play block centers in whatever height is left, so taller
-            phones get even breathing room instead of one dead gap. */}
-        <div className="flex-1 min-h-0 flex flex-col justify-center gap-2.5 py-2.5">
+        {/* Leftover height splits 2:3 above/below the play block (slightly
+            top-weighted reads better than dead-centering), and the block's
+            own rhythm scales with the viewport via --gap-y. */}
+        <div className="flex-[2] min-h-2.5" />
+        <div className="flex flex-col gap-(--gap-y)">
           <MeldConsole
             slots={slots}
             onPull={handlePull}
@@ -223,6 +225,7 @@ export default function App() {
             )}
           </div>
         </div>
+        <div className="flex-[3] min-h-2.5" />
 
         <TodaysFive wordOrder={wordOrder} validWords={validWords} found={found} revealed={revealed} />
       </div>

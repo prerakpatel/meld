@@ -33,6 +33,30 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  /* Fluid vertical sizing: every height-driving dimension scales with the
+     small viewport height (svh = screen with browser bars visible, stable on
+     iOS Safari and Android Chrome). The clamp minimums equal the iPhone SE
+     layout; the maximums fit an iPhone 16 and bigger without ballooning. */
+  :root {
+    --slot-h: 3.5rem;      /* meld slots */
+    --tile-h: 3.25rem;     /* bank tiles */
+    --tile-fs: 17px;       /* bank tile lettering */
+    --btn-h: 3rem;         /* Meld button */
+    --seed-h: 2rem;        /* ledger seeds and pills */
+    --gap-y: 0.625rem;     /* vertical rhythm between sections */
+  }
+
+  @supports (height: 1svh) {
+    :root {
+      --slot-h: clamp(3.5rem, 9.5svh, 4.75rem);
+      --tile-h: clamp(3.25rem, 9svh, 4.5rem);
+      --tile-fs: clamp(17px, 3svh, 22px);
+      --btn-h: clamp(3rem, 7.2svh, 3.5rem);
+      --seed-h: clamp(2rem, 5.4svh, 2.75rem);
+      --gap-y: clamp(0.625rem, 2.8svh, 1.75rem);
+    }
+  }
+
   html,
   body,
   #root {

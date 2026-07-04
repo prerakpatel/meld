@@ -4,7 +4,7 @@ const TILE_INSLOT = 'w-full h-full rounded-xl bg-white border-2 border-charcoal 
 
 function Slot({ chunk, onPull }) {
   return (
-    <div className={`w-[104px] h-14 rounded-xl border-2 flex items-center justify-center transition-all duration-200 ${chunk ? 'border-tile-edge bg-transparent p-0' : 'border-paper-line bg-paper-deep'}`}>
+    <div className={`w-[clamp(104px,29vw,124px)] h-(--slot-h) rounded-xl border-2 flex items-center justify-center transition-all duration-200 ${chunk ? 'border-tile-edge bg-transparent p-0' : 'border-paper-line bg-paper-deep'}`}>
       {chunk && (
         <div className={TILE_INSLOT} onClick={onPull}>
           {chunk.txt}
@@ -32,7 +32,7 @@ export default function MeldConsole({ slots, onPull, onMeld, disabled, shaking }
         )}
       </div>
       <button
-        className={`${PRIMARY_BTN} font-slab text-lg tracking-[0.02em] px-6 py-3`}
+        className={`${PRIMARY_BTN} font-slab text-lg tracking-[0.02em] px-6 h-(--btn-h) flex items-center justify-center`}
         disabled={disabled}
         onClick={onMeld}
       >

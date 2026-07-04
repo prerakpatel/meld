@@ -7,7 +7,7 @@ import { KeyIcon } from './icons';
 function LedgerSlot({ number, word, isKey, state }) {
   if (state === 'hidden') {
     return (
-      <span className={`h-8 min-w-8 px-0 rounded-full border flex items-center justify-center ${isKey ? 'bg-coral-mist border-[#F0C9BE]' : 'bg-paper-deep border-paper-line'}`}>
+      <span className={`h-(--seed-h) min-w-(--seed-h) px-0 rounded-full border flex items-center justify-center ${isKey ? 'bg-coral-mist border-[#F0C9BE]' : 'bg-paper-deep border-paper-line'}`}>
         {isKey ? (
           <span className="text-coral"><KeyIcon /></span>
         ) : (
@@ -20,7 +20,7 @@ function LedgerSlot({ number, word, isKey, state }) {
   const missed = state === 'missed';
   return (
     <span
-      className={`h-8 px-3 rounded-full border-[1.5px] flex items-center gap-1.5 animate-flyin ${
+      className={`h-(--seed-h) px-3 rounded-full border-[1.5px] flex items-center gap-1.5 animate-flyin ${
         missed
           ? 'bg-transparent border-dashed border-[#cfc7b8]'
           : isKey
@@ -45,7 +45,7 @@ export default function TodaysFive({ wordOrder, validWords, found, revealed }) {
         <h3 className="text-[10px] tracking-[0.16em] uppercase text-muted font-bold m-0">Today&rsquo;s five</h3>
         <span className="text-[10px] tracking-[0.16em] uppercase text-muted font-bold">{foundCount}/5</span>
       </div>
-      <div className="flex flex-wrap items-start content-start gap-1.5 min-h-[74px]">
+      <div className="flex flex-wrap items-start content-start gap-1.5 min-h-[calc(2*var(--seed-h)+0.375rem)]">
         {wordOrder.map((k, idx) => {
           const isFound = found.includes(k);
           const isMissed = revealed.includes(k);
