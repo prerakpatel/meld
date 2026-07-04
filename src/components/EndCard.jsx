@@ -20,8 +20,12 @@ export default function EndCard({ won, foundCount, totalWords, score, meldsLeft,
         </p>
         <div className="font-slab text-[44px] font-bold leading-none text-coral mb-1">{score}</div>
         <p className="text-[11px] tracking-[0.16em] uppercase text-muted font-bold m-0 mb-5">points</p>
-        <p className="text-[14px] text-ink-soft m-0 mb-5">
+        <p className="text-[14px] text-ink-soft m-0 mb-1">
           Streak <b>{stats.currentStreak}🔥</b> &middot; best <b>{stats.longestStreak}</b>
+        </p>
+        <p className="text-[12px] text-muted m-0 mb-5">
+          Played {stats.gamesPlayed} &middot; won {stats.gamesWon}
+          {stats.gamesPlayed > 0 && ` (${Math.round((stats.gamesWon / stats.gamesPlayed) * 100)}%)`}
         </p>
         <div className="font-mono text-[15px] tracking-widest bg-white/60 border border-dashed border-tile-edge rounded-xl p-3.5 mb-5 whitespace-pre-line text-left">
           {shareText}

@@ -52,6 +52,7 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
   const [toast, setToast] = useState({ show: false, msg: '', type: '' });
   const [flashTiles, setFlashTiles] = useState([]);
   const [shaking, setShaking] = useState(false);
+  const [celebrating, setCelebrating] = useState(false);
 
   // Hints: [{ key, clue }] — a crossword-style definition of an unfound
   // word. The active clue sits in the meld console; the word's ledger seat
@@ -125,8 +126,10 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
       showToast(`+${pts}  ${validWords[k].word} ✓`, 'good');
 
       if (newFound.length === totalWords) {
-        setOver(true); // lock input immediately; the card follows the animation
-        setTimeout(() => endGame(true, newFound), 500);
+        setOver(true); // lock input immediately; the card follows the wave
+        setCelebrating(true);
+        setTimeout(() => setCelebrating(false), 1200);
+        setTimeout(() => endGame(true, newFound), 1100);
       }
     } else if (k) {
       showToast('Already melded that.');
@@ -242,6 +245,8 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
             tiles={tiles}
             selectedIdxs={slots.filter(Boolean).map(s => s.idx)}
             flashIdxs={flashTiles}
+            over={over}
+            celebrate={celebrating}
             onPick={handlePick}
           />
 
