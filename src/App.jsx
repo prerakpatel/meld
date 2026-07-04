@@ -32,7 +32,7 @@ const HINT_COST = 1;
 
 const PRIMARY_BTN = 'font-sans font-bold text-white bg-coral rounded-xl border-none cursor-pointer transition-transform w-full text-center shadow-[0_4px_0_#c24d34] active:translate-y-1 active:shadow-[0_0_0_#c24d34] disabled:opacity-50 disabled:cursor-default disabled:translate-y-0 disabled:shadow-[0_4px_0_#c24d34]';
 const SECONDARY_BTN = 'px-5 py-2.5 rounded-full text-[13px] font-semibold border border-[#d1c8b8] bg-transparent text-charcoal active:scale-95 disabled:opacity-50 disabled:cursor-default';
-const TILE_BANK = 'w-[calc(25%-8px)] h-15 rounded-xl bg-white border-2 border-charcoal shadow-[0_4px_0_#1a1a1a] flex items-center justify-center text-xl font-bold text-charcoal cursor-pointer select-none transition-[transform,box-shadow] duration-100 active:translate-y-1 active:shadow-[0_0_0_#1a1a1a]';
+const TILE_BANK = 'w-full h-14 rounded-xl bg-white border-2 border-charcoal shadow-[0_4px_0_#1a1a1a] flex items-center justify-center text-lg font-bold text-charcoal cursor-pointer select-none transition-[transform,box-shadow] duration-100 active:translate-y-1 active:shadow-[0_0_0_#1a1a1a] overflow-hidden px-1';
 const TILE_INSLOT = 'w-full h-full rounded-xl bg-white border-2 border-charcoal flex items-center justify-center text-xl font-bold text-charcoal cursor-pointer select-none active:translate-y-1';
 
 export default function App() {
@@ -280,8 +280,8 @@ export default function App() {
         </p>
       </header>
 
-      <div className="bg-white border border-tile-edge rounded-[20px] pt-6 px-4 pb-5 flex flex-col items-center mb-4 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
-        <div className="flex justify-center items-center gap-3 w-full mb-4">
+      <div className="bg-white border border-tile-edge rounded-[20px] pt-4 px-3 pb-3 flex flex-col items-center mb-3 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
+        <div className="flex justify-center items-center gap-3 w-full mb-3">
           <div className={`w-[110px] h-16 rounded-xl border-2 flex items-center justify-center transition-all duration-200 ${slots[0] ? 'border-[#d1c8b8] bg-transparent p-0' : 'border-[#E6E1D6] bg-[#F5F2EB]'}`}>
             {slots[0] && (
               <div className={`${TILE_INSLOT} font-slab`} onClick={() => handlePull(0)}>
@@ -298,7 +298,7 @@ export default function App() {
             )}
           </div>
         </div>
-        <div className="text-[13px] text-muted mb-4 text-center">
+        <div className="text-[13px] text-muted mb-3 text-center">
           {slots[0] && slots[1] ? (
             <span className="text-moss-deep font-bold tracking-widest">
               {slots[0].txt + slots[1].txt}
@@ -316,14 +316,14 @@ export default function App() {
         </button>
       </div>
 
-      <div className="flex flex-wrap justify-center gap-2.5 mx-auto max-w-[380px]">
+      <div className="grid grid-cols-4 gap-2 mx-auto max-w-[380px]">
         {tiles.map((t, i) => {
           const isSelected = slots.some(s => s && s.idx === i);
           const isFlashing = flashTiles.includes(i);
           return (
             <div
               key={i}
-              className={`${TILE_BANK} font-slab ${isSelected ? 'opacity-30 pointer-events-none' : ''} ${isFlashing ? 'animate-flash' : ''}`}
+              className={`${TILE_BANK} font-slab truncate ${isSelected ? 'opacity-30 pointer-events-none' : ''} ${isFlashing ? 'animate-flash' : ''}`}
               onClick={() => handlePick(i)}
             >
               {t}
@@ -332,7 +332,7 @@ export default function App() {
         })}
       </div>
 
-      <div className="flex gap-3 justify-center my-4">
+      <div className="flex gap-3 justify-center my-3">
         {!over ? (
           <>
             <button className={`${SECONDARY_BTN} text-coral-deep border-[#e3c4be] bg-[#fdf5f3] flex items-center`} onClick={handleHint} disabled={over}>
@@ -349,37 +349,29 @@ export default function App() {
         )}
       </div>
 
-      <div className="mt-auto mb-5">
-        <h3 className="text-[11px] tracking-[0.16em] uppercase text-muted font-bold m-0 mb-2 ml-1">TODAY'S FIVE</h3>
-        <div className="bg-white border border-tile-edge rounded-[20px] p-4 flex flex-col gap-3">
+      <div className="mt-auto mb-2">
+        <h3 className="text-[10px] tracking-[0.16em] uppercase text-muted font-bold m-0 mb-1.5 ml-1">TODAY'S FIVE</h3>
+        <div className="grid grid-cols-5 gap-1.5">
           {wordOrder.map((k, idx) => {
             const isFound = found.includes(k);
             const isMissed = revealed.includes(k);
             const isKey = validWords[k]?.key;
+            const revealedState = isFound || isMissed;
 
-            if (isFound || isMissed) {
-              return (
-                <div key={k} className="flex items-center gap-3">
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${isKey ? 'border-2 border-coral bg-transparent text-coral' : 'bg-[#F5F2EB] text-muted'}`}>
-                    {isKey ? <KeyIcon /> : (idx + 1)}
-                  </div>
-                  <div
-                    className={`font-slab text-lg font-bold tracking-wider uppercase animate-flyin ${isKey ? 'text-coral' : 'text-charcoal'} ${isMissed ? 'opacity-50' : ''}`}
-                  >
-                    {validWords[k].word}
-                  </div>
-                  {isKey && <div className="ml-auto text-[10px] tracking-[0.16em] uppercase text-coral font-bold">KEYSTONE</div>}
-                </div>
-              );
-            }
-
-            // Empty slot
             return (
-              <div key={`empty-${idx}`} className="flex items-center gap-3">
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${isKey ? 'border-2 border-coral bg-transparent text-coral' : 'bg-[#F5F2EB] text-muted'}`}>
-                  {isKey ? <KeyIcon /> : (idx + 1)}
-                </div>
-                {isKey && <div className="ml-auto text-[10px] tracking-[0.16em] uppercase text-coral font-bold">KEYSTONE</div>}
+              <div
+                key={k}
+                className={`h-10 rounded-lg flex items-center justify-center px-0.5 border ${revealedState ? (isKey ? 'bg-[#FCE9E4] border-coral' : 'bg-[#EFF6E9] border-[#C7DDB5]') : 'bg-[#F5F2EB] border-transparent'}`}
+              >
+                {revealedState ? (
+                  <span className={`font-slab text-[10px] font-bold uppercase leading-tight truncate w-full text-center animate-flyin ${isKey ? 'text-coral' : 'text-charcoal'} ${isMissed ? 'opacity-50' : ''}`}>
+                    {validWords[k].word}
+                  </span>
+                ) : isKey ? (
+                  <KeyIcon />
+                ) : (
+                  <span className="text-[10px] text-muted font-bold">{idx + 1}</span>
+                )}
               </div>
             );
           })}
