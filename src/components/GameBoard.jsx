@@ -316,16 +316,17 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
             onPick={handlePick}
           />
 
-          <div className="flex gap-2 justify-center">
+          <div className="flex gap-2 justify-center mt-1.5">
             {!over ? (
               <>
-                <button className={`${SECONDARY_BTN} px-4`} onClick={handleShuffle}>
+                <button className={`${SECONDARY_BTN} px-3.5 flex items-center`} onClick={handleShuffle}>
+                  <span className="material-symbols-rounded text-[15px] leading-none mr-1" aria-hidden="true">shuffle</span>
                   Shuffle
                 </button>
-                <button className={`${SECONDARY_BTN} px-4 text-coral-deep border-[#e3c4be] bg-[#fdf5f3] flex items-center`} onClick={handleHint}>
+                <button className={`${SECONDARY_BTN} px-3.5 text-coral-deep border-[#e3c4be] bg-[#fdf5f3] flex items-center`} onClick={handleHint}>
                   <LightbulbIcon /> Hint (-1 meld)
                 </button>
-                <button className={`${SECONDARY_BTN} px-4`} onClick={handleClear}>
+                <button className={`${SECONDARY_BTN} px-3.5`} onClick={handleClear}>
                   Clear
                 </button>
               </>
