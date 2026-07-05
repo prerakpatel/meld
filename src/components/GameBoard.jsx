@@ -26,7 +26,7 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
   const [themeShimmer] = useState(() => !ephemeral && !!puzzle.theme && shouldGreetTheme(puzzle.day));
 
   // Derived puzzle state
-  const { tiles, validWords, wordOrder, totalWords } = useMemo(() => {
+  const { validWords, wordOrder, totalWords } = useMemo(() => {
     const validWords = {};
     const wordOrder = [];
 
@@ -36,11 +36,21 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
       wordOrder.push(k);
     });
 
-    return { tiles: puzzle.pool, validWords, wordOrder, totalWords: wordOrder.length };
+    return { validWords, wordOrder, totalWords: wordOrder.length };
   }, [puzzle]);
 
   // Game state (restored from the device if today's game is in progress)
   const [slots, setSlots] = useState([null, null]);
+  // Tile arrangement: shuffleable, remembered across reloads. Falls back to
+  // the default order if the save doesn't match today's pool.
+  const [order, setOrder] = useState(() => {
+    const savedOrder = saved?.order;
+    return Array.isArray(savedOrder)
+      && savedOrder.length === puzzle.pool.length
+      && puzzle.pool.every(c => savedOrder.includes(c))
+      ? savedOrder
+      : puzzle.pool;
+  });
   const [found, setFound] = useState(() => saved?.found ?? []);
   const [melds, setMelds] = useState(() => saved?.melds ?? START_MELDS);
   const [score, setScore] = useState(() => saved?.score ?? 0);
@@ -50,7 +60,7 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
 
   // UI state
   const [toast, setToast] = useState({ show: false, msg: '', type: '' });
-  const [flashTiles, setFlashTiles] = useState([]);
+  const [flashChunks, setFlashChunks] = useState([]);
   const [shaking, setShaking] = useState(false);
   const [celebrating, setCelebrating] = useState(false);
 
@@ -64,8 +74,8 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
   // refreshing resumes the same game (and can't be used to retry a bad day).
   useEffect(() => {
     if (ephemeral) return;
-    saveGameState({ day: puzzle.day, found, melds, score, over, revealed, hints });
-  }, [puzzle, ephemeral, found, melds, score, over, revealed, hints]);
+    saveGameState({ day: puzzle.day, found, melds, score, over, revealed, hints, order });
+  }, [puzzle, ephemeral, found, melds, score, over, revealed, hints, order]);
 
   const showToast = (msg, type = '') => {
     setToast({ show: true, msg, type });
@@ -78,16 +88,29 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handlePick = (idx) => {
+  const handlePick = (chunk) => {
     if (over) return;
-    if (slots.some(s => s && s.idx === idx)) return;
+    if (slots.some(s => s && s.txt === chunk)) return;
 
     const openIdx = slots.indexOf(null);
     if (openIdx < 0) return;
 
     const newSlots = [...slots];
-    newSlots[openIdx] = { idx, txt: tiles[idx] };
+    newSlots[openIdx] = { txt: chunk };
     setSlots(newSlots);
+  };
+
+  // Free re-arrangement: reveals nothing, just fresh adjacencies for the eye.
+  const handleShuffle = () => {
+    if (over) return;
+    setOrder(o => {
+      const next = [...o];
+      for (let i = next.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [next[i], next[j]] = [next[j], next[i]];
+      }
+      return next;
+    });
   };
 
   const handlePull = (slotIndex) => {
@@ -120,8 +143,8 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
       const pts = PTS_PER_WORD + (validWords[k].key ? PTS_KEYSTONE : 0) + melds;
       setScore(s => s + pts);
 
-      setFlashTiles([slots[0].idx, slots[1].idx]);
-      setTimeout(() => setFlashTiles([]), 500);
+      setFlashChunks([slots[0].txt, slots[1].txt]);
+      setTimeout(() => setFlashChunks([]), 500);
 
       showToast(`+${pts}  ${validWords[k].word} ✓`, 'good');
 
@@ -242,9 +265,9 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
           />
 
           <TileGrid
-            tiles={tiles}
-            selectedIdxs={slots.filter(Boolean).map(s => s.idx)}
-            flashIdxs={flashTiles}
+            tiles={order}
+            selectedChunks={slots.filter(Boolean).map(s => s.txt)}
+            flashChunks={flashChunks}
             over={over}
             celebrate={celebrating}
             onPick={handlePick}
@@ -258,6 +281,9 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
                 </button>
                 <button className={SECONDARY_BTN} onClick={handleClear}>
                   Clear
+                </button>
+                <button className={`${SECONDARY_BTN} px-3 flex items-center`} onClick={handleShuffle} aria-label="Shuffle tiles">
+                  <span className="material-symbols-rounded text-[18px] leading-none" aria-hidden="true">shuffle</span>
                 </button>
               </>
             ) : (

@@ -202,6 +202,7 @@ function naturalSplits(word) {
     const a = word.slice(0, i);
     const b = word.slice(i);
     if (a.length > MAX_FRAG || b.length > MAX_FRAG) continue;
+    if (a === b) continue; // one tile can't be tapped twice (COUS+COUS)
     if (compoundBoundaries.length && !compoundBoundaries.includes(i)) continue;
     if (DIGRAPHS.has(word[i - 1] + word[i])) continue; // never cut a digraph
     if (b[0] === b[1]) continue; // no chunk starting "TTER"/"LLET"
