@@ -39,17 +39,54 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
     return { validWords, wordOrder, totalWords: wordOrder.length };
   }, [puzzle]);
 
+  // An arrangement is a "giveaway" if an unfound word's two chunks sit
+  // horizontally adjacent (either order) on the 4x2 board.
+  const intendedPairs = useMemo(
+    () => new Set(puzzle.words.flatMap(o => [o.a + '+' + o.b, o.b + '+' + o.a])),
+    [puzzle],
+  );
+  const hasGiveaway = (arr, foundList) => {
+    const foundChunks = new Set(
+      puzzle.words.filter(o => foundList.includes(o.a + '+' + o.b)).flatMap(o => [o.a, o.b]),
+    );
+    for (let row = 0; row < 2; row++) {
+      for (let col = 0; col < 3; col++) {
+        const x = arr[row * 4 + col];
+        const y = arr[row * 4 + col + 1];
+        if (intendedPairs.has(x + '+' + y) && !(foundChunks.has(x) && foundChunks.has(y))) return true;
+      }
+    }
+    return false;
+  };
+
   // Game state (restored from the device if today's game is in progress)
   const [slots, setSlots] = useState([null, null]);
-  // Tile arrangement: shuffleable, remembered across reloads. Falls back to
-  // the default order if the save doesn't match today's pool.
+  // Tile arrangement: shuffleable, remembered across reloads. The day's
+  // starting layout is seeded by the day number (same for everyone) and,
+  // like every shuffle, avoids giveaway adjacencies.
   const [order, setOrder] = useState(() => {
     const savedOrder = saved?.order;
-    return Array.isArray(savedOrder)
+    if (Array.isArray(savedOrder)
       && savedOrder.length === puzzle.pool.length
-      && puzzle.pool.every(c => savedOrder.includes(c))
-      ? savedOrder
-      : puzzle.pool;
+      && puzzle.pool.every(c => savedOrder.includes(c))) {
+      return savedOrder;
+    }
+    let seed = puzzle.day * 2654435761 % 2147483647;
+    const rand = () => {
+      seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+      return seed / 0x7fffffff;
+    };
+    let arr = puzzle.pool;
+    for (let tries = 0; tries < 60; tries++) {
+      const next = [...puzzle.pool];
+      for (let i = next.length - 1; i > 0; i--) {
+        const j = Math.floor(rand() * (i + 1));
+        [next[i], next[j]] = [next[j], next[i]];
+      }
+      arr = next;
+      if (!hasGiveaway(arr, saved?.found ?? [])) break;
+    }
+    return arr;
   });
   const [found, setFound] = useState(() => saved?.found ?? []);
   const [melds, setMelds] = useState(() => saved?.melds ?? START_MELDS);
@@ -100,14 +137,20 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
     setSlots(newSlots);
   };
 
-  // Free re-arrangement: reveals nothing, just fresh adjacencies for the eye.
+  // Free re-arrangement: reveals nothing, just fresh adjacencies for the
+  // eye. Redraws until no unfound word's chunks land side by side.
   const handleShuffle = () => {
     if (over) return;
     setOrder(o => {
-      const next = [...o];
-      for (let i = next.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [next[i], next[j]] = [next[j], next[i]];
+      let next = o;
+      for (let tries = 0; tries < 60; tries++) {
+        const candidate = [...o];
+        for (let i = candidate.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [candidate[i], candidate[j]] = [candidate[j], candidate[i]];
+        }
+        next = candidate;
+        if (!hasGiveaway(candidate, found)) break;
       }
       return next;
     });
@@ -273,17 +316,17 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
             onPick={handlePick}
           />
 
-          <div className="flex gap-3 justify-center">
+          <div className="flex gap-2 justify-center">
             {!over ? (
               <>
-                <button className={`${SECONDARY_BTN} text-coral-deep border-[#e3c4be] bg-[#fdf5f3] flex items-center`} onClick={handleHint}>
+                <button className={`${SECONDARY_BTN} px-4`} onClick={handleShuffle}>
+                  Shuffle
+                </button>
+                <button className={`${SECONDARY_BTN} px-4 text-coral-deep border-[#e3c4be] bg-[#fdf5f3] flex items-center`} onClick={handleHint}>
                   <LightbulbIcon /> Hint (-1 meld)
                 </button>
-                <button className={SECONDARY_BTN} onClick={handleClear}>
+                <button className={`${SECONDARY_BTN} px-4`} onClick={handleClear}>
                   Clear
-                </button>
-                <button className={`${SECONDARY_BTN} px-3 flex items-center`} onClick={handleShuffle} aria-label="Shuffle tiles">
-                  <span className="material-symbols-rounded text-[18px] leading-none" aria-hidden="true">shuffle</span>
                 </button>
               </>
             ) : (
