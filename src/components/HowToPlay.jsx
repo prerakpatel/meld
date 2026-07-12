@@ -49,9 +49,9 @@ export default function HowToPlay({ onClose }) {
         </button>
 
         <p className="text-[10px] tracking-[0.12em] uppercase text-muted m-0 mt-3 leading-relaxed text-center">
-          An original game from By The Square
+          An original game from <b className="text-ink-soft">By The Square</b>
           <br />
-          Created by Prerak Patel
+          Created by <b className="text-ink-soft">Prerak Patel</b>
         </p>
       </div>
     </>

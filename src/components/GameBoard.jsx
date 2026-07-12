@@ -254,9 +254,10 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
     if (!ephemeral) setStats(recordResult(won));
   };
 
-  // Share card: the word grid (which words, keystone in gold) plus a melds
-  // meter — the skill story that actually varies between players — a warm
-  // one-word verdict, the score, and the streak. Spoiler-free.
+  // Share card, kept deliberately minimal: a one-word verdict, the word grid
+  // (keystone in gold — MELD's signature), and a melds meter (🟠 left / ⚪
+  // spent) — the skill flex that varies between players. Score and streak
+  // stay in the end card but don't travel. Spoiler-free.
   const shareText = useMemo(() => {
     const won = found.length === totalWords;
     const grid = wordOrder.map(k => {
@@ -269,9 +270,8 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
       : melds === 3 ? 'Clean'
       : melds === 2 ? 'Steady'
       : 'Clutch';
-    const streak = won && stats.currentStreak > 0 ? ` · 🔥${stats.currentStreak}` : '';
-    return `MELD #${puzzle.day} · ${verdict}\n${grid}\n${meter} · ${score} pts${streak}\nmeld.bythesquare.app`;
-  }, [puzzle, wordOrder, validWords, found, totalWords, melds, score, stats.currentStreak]);
+    return `MELD #${puzzle.day} · ${verdict}\n${grid}\n${meter}`;
+  }, [puzzle, wordOrder, validWords, found, totalWords, melds]);
 
   const copyResult = () => {
     if (navigator.clipboard) {
