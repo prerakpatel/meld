@@ -259,7 +259,7 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
       if (found.includes(k)) return validWords[k].key ? '🟨' : '🟩';
       return '⬜';
     }).join('');
-    return `MELD #${puzzle.day}  ${score}pts\n${grid}`;
+    return `MELD #${puzzle.day}  ${score}pts\n${grid}\nmeld.bythesquare.app`;
   }, [puzzle, wordOrder, validWords, found, score]);
 
   const copyResult = () => {

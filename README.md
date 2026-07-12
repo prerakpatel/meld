@@ -2,7 +2,8 @@
 
 A cozy daily word game — meld two letter-chunks into a word, find all five of the day's words, including the hidden **keystone**. Same puzzle for everyone, every day.
 
-An original game by **Prerak Patel** · © 2026 Prerak Patel. All rights reserved.
+An original game from **By The Square** · Created by **Prerak Patel** · [meld.bythesquare.app](https://meld.bythesquare.app)
+© 2026 Prerak Patel. All rights reserved.
 
 ## How it works
 
