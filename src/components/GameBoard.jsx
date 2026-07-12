@@ -254,23 +254,22 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
     if (!ephemeral) setStats(recordResult(won));
   };
 
-  // Share card, kept deliberately minimal: a one-word verdict, the word grid
-  // (keystone in gold — MELD's signature), and a melds meter (🟠 left / ⚪
-  // spent) — the skill flex that varies between players. Score and streak
-  // stay in the end card but don't travel. Spoiler-free.
+  // Share card, kept deliberately minimal: a one-word verdict (which still
+  // encodes how cleanly you played — it's derived from melds left), the word
+  // grid with the keystone in gold, and a words-found count. Spoiler-free;
+  // score and streak stay in the end card but don't travel.
   const shareText = useMemo(() => {
     const won = found.length === totalWords;
     const grid = wordOrder.map(k => {
       if (found.includes(k)) return validWords[k].key ? '🟨' : '🟩';
       return '⬜';
     }).join('');
-    const meter = Array.from({ length: START_MELDS }, (_, i) => (i < melds ? '🟠' : '⚪')).join('');
     const verdict = !won ? 'Out of melds'
       : melds >= 4 ? 'Flawless ☕'
       : melds === 3 ? 'Clean'
       : melds === 2 ? 'Steady'
       : 'Clutch';
-    return `MELD #${puzzle.day} · ${verdict}\n${grid}\n${meter}`;
+    return `MELD #${puzzle.day} · ${verdict}\n${grid} ${found.length}/${totalWords} words`;
   }, [puzzle, wordOrder, validWords, found, totalWords, melds]);
 
   const copyResult = () => {
