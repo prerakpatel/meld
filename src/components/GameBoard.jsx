@@ -7,6 +7,7 @@ import TileGrid from './TileGrid';
 import TodaysFive from './TodaysFive';
 import EndCard from './EndCard';
 import { LightbulbIcon } from './icons';
+import emberFlame from '../assets/ember.webp';
 import { PRIMARY_BTN, SECONDARY_BTN } from './styles';
 
 const START_MELDS = 4;
@@ -396,7 +397,9 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
                   Shuffle
                 </button>
                 <button className={`${SECONDARY_BTN} px-3.5 text-coral-deep border-[#e3c4be] bg-[#fdf5f3] flex items-center`} onClick={handleHint}>
-                  <LightbulbIcon /> {emberAvailable ? 'Hint — free 🔥' : 'Hint (-1 meld)'}
+                  <LightbulbIcon /> {emberAvailable ? (
+                    <>Hint — free <img src={emberFlame} alt="" className="w-[15px] h-[15px] ml-1" /></>
+                  ) : 'Hint (-1 meld)'}
                 </button>
                 <button className={`${SECONDARY_BTN} px-3.5`} onClick={handleClear}>
                   Clear
