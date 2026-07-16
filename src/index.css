@@ -28,6 +28,10 @@
   --animate-shake: shake 0.4s ease;
   --animate-pop: pop 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.4);
   --animate-themein: themein 1.8s ease both;
+  --animate-nudge-r: nudge-r 3.6s ease-in-out infinite;
+  --animate-nudge-l: nudge-l 3.6s ease-in-out infinite;
+  --animate-fade-blink: fade-blink 3.6s ease-in-out infinite;
+  --animate-word-pop: word-pop 3.6s ease-in-out infinite;
 }
 
 @layer base {
@@ -133,6 +137,26 @@
   0% { opacity: 0; transform: translateY(4px); color: var(--color-coral-deep); }
   40% { opacity: 1; transform: translateY(0); color: var(--color-coral-deep); }
   100% { color: inherit; }
+}
+
+/* How-to-play demo: the two chunks drift together (the + gives way), the
+   melded word pops, then everything settles back. Resting pose = the plain
+   static diagram, so reduced-motion users just see that. */
+@keyframes nudge-r {
+  0%, 32%, 68%, 100% { transform: translateX(0); }
+  46%, 54% { transform: translateX(13px); }
+}
+@keyframes nudge-l {
+  0%, 32%, 68%, 100% { transform: translateX(0); }
+  46%, 54% { transform: translateX(-13px); }
+}
+@keyframes fade-blink {
+  0%, 32%, 68%, 100% { opacity: 1; }
+  46%, 54% { opacity: 0; }
+}
+@keyframes word-pop {
+  0%, 38%, 74%, 100% { transform: scale(1); }
+  52% { transform: scale(1.12); }
 }
 
 @media (prefers-reduced-motion: reduce) {

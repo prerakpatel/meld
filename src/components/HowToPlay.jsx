@@ -23,23 +23,21 @@ export default function HowToPlay({ onClose }) {
         <h2 className="font-slab text-[24px] font-bold m-0 mb-0.5 text-ink text-center">How to play</h2>
         <p className="text-[13px] text-muted m-0 mb-3 text-center">Meld chunks into words. Find all five.</p>
 
-        <div className="flex items-center justify-center gap-1.5 mb-3">
-          <span className={MINI_TILE}>COT</span>
-          <span className="text-muted font-semibold">+</span>
-          <span className={MINI_TILE}>TON</span>
+        <div className="flex items-center justify-center gap-1.5 mb-4 mt-1">
+          <span className={`${MINI_TILE} animate-nudge-r`}>COT</span>
+          <span className="text-muted font-semibold animate-fade-blink">+</span>
+          <span className={`${MINI_TILE} animate-nudge-l`}>TON</span>
           <span className="text-muted font-semibold">=</span>
-          <span className="font-slab text-[15px] font-bold text-moss-deep tracking-wide">COTTON</span>
+          <span className="inline-block font-slab text-[15px] font-bold text-moss-deep tracking-wide animate-word-pop">COTTON</span>
         </div>
 
-        <ul className="m-0 mb-3 pl-4 flex flex-col gap-2 list-disc marker:text-coral">
-          <Rule>Tap two chunks, then press <b>Meld</b> — every word is exactly two chunks.</Rule>
-          <Rule>Find all <b>five</b> of today&rsquo;s words. A chunk can belong to more than one word, so tiles never disappear.</Rule>
-          <Rule>A wrong meld spends one of your <b>4 melds</b>. Spend them all and the day is over.</Rule>
+        <ul className="m-0 mb-3 pl-4 flex flex-col gap-2.5 list-disc marker:text-coral">
+          <Rule>Tap two chunks, press <b>Meld</b>. Find all <b>five</b> words — chunks can be reused.</Rule>
+          <Rule>A wrong meld spends one of your <b>4 melds</b>. Out of melds, the day is over.</Rule>
           <Rule>
             <span className="inline-flex items-center gap-1 align-middle text-coral"><KeyIcon className="inline-block" /></span>{' '}
-            One word is the <b>keystone</b> — finding it is worth extra points.
+            The <b>keystone</b> is worth extra. Stuck? A <b>hint</b> gives a clue for 1 meld.
           </Rule>
-          <Rule>Stuck? A <b>hint</b> reveals a clue — the definition of one unfound word. It costs 1 meld.</Rule>
         </ul>
 
         <p className="text-[12px] text-muted m-0 mb-3 text-center">A new puzzle at midnight — the same five words for everyone.</p>
