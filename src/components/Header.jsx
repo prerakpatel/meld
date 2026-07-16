@@ -1,6 +1,8 @@
+import { FlameIcon } from './icons';
+
 const MONTHS = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
 
-export default function Header({ meldsLeft, totalMelds, score, dayNumber, theme, themeShimmer, practice, onHelp, onWordmarkTap }) {
+export default function Header({ meldsLeft, totalMelds, score, dayNumber, theme, themeShimmer, practice, ember, onHelp, onWordmarkTap }) {
   const now = new Date();
   // The subtitle is the day's theme when it genuinely has one, else the date.
   const dateLabel = practice ? 'PRACTICE' : theme ?? `${MONTHS[now.getMonth()]} ${now.getDate()}`;
@@ -34,6 +36,11 @@ export default function Header({ meldsLeft, totalMelds, score, dayNumber, theme,
                 className={`w-3.5 h-3.5 rounded-full transition-all duration-300 ${i >= meldsLeft ? 'bg-[#E0D2BB] scale-[0.62]' : 'bg-coral'}`}
               ></span>
             ))}
+            {ember && (
+              <span className="animate-flicker ml-0.5" title="Your Ember — today's hint is free">
+                <FlameIcon className="block" />
+              </span>
+            )}
           </div>
         </div>
         <div className="text-right">

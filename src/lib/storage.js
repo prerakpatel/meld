@@ -13,6 +13,8 @@ const DEFAULT_STATS = {
   gamesPlayed: 0,
   gamesWon: 0,
   lastPlayedDate: null,
+  emberEarnedDate: null,
+  emberUsedDate: null,
 };
 
 function localDateStr(d) {
@@ -72,7 +74,8 @@ export function loadStats() {
 
 // Called once when a game ends. Winning on consecutive days grows the
 // streak; a loss resets it; results are only counted once per calendar day.
-export function recordResult(won) {
+// A flawless win (all melds intact) earns an Ember: tomorrow's hint is free.
+export function recordResult(won, flawless = false) {
   const stats = loadStats();
   const now = new Date();
   const today = localDateStr(now);
@@ -91,12 +94,37 @@ export function recordResult(won) {
   }
 
   const next = {
+    ...stats,
     currentStreak,
     longestStreak: Math.max(stats.longestStreak, currentStreak),
     gamesPlayed: stats.gamesPlayed + 1,
     gamesWon: stats.gamesWon + (won ? 1 : 0),
     lastPlayedDate: today,
+    emberEarnedDate: won && flawless ? today : stats.emberEarnedDate,
   };
   writeJson(STATS_KEY, next);
   return next;
+}
+
+// The Ember glows only on the day after it was earned, and only until used.
+export function hasEmberToday(now = new Date()) {
+  const stats = loadStats();
+  if (!stats.emberEarnedDate) return false;
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  return stats.emberEarnedDate === localDateStr(yesterday)
+    && stats.emberUsedDate !== localDateStr(now);
+}
+
+export function consumeEmber() {
+  writeJson(STATS_KEY, { ...loadStats(), emberUsedDate: localDateStr(new Date()) });
+}
+
+// True once per day: used to show the "your Ember is glowing" reminder only
+// on the first open, not every refresh.
+const EMBER_GREET_KEY = 'meld_ember_greet_v1';
+export function shouldRemindEmber(day) {
+  if (readJson(EMBER_GREET_KEY) === day) return false;
+  writeJson(EMBER_GREET_KEY, day);
+  return true;
 }

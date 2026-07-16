@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { loadGameState, saveGameState, loadStats, recordResult, shouldGreetTheme } from '../lib/storage';
+import { loadGameState, saveGameState, loadStats, recordResult, shouldGreetTheme, hasEmberToday, consumeEmber, shouldRemindEmber } from '../lib/storage';
 import { track } from '../lib/analytics';
 import Header from './Header';
 import MeldConsole from './MeldConsole';
@@ -33,6 +33,8 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
   const [stats, setStats] = useState(() => loadStats());
   // Play the theme's settle-in shimmer only on the first view of a new day.
   const [themeShimmer] = useState(() => !ephemeral && !!puzzle.theme && shouldGreetTheme(puzzle.day));
+  // The Ember: earned by a flawless day, it makes today's hint free.
+  const [emberAvailable, setEmberAvailable] = useState(() => !ephemeral && hasEmberToday());
 
   // Derived puzzle state
   const { validWords, wordOrder, totalWords } = useMemo(() => {
@@ -131,6 +133,18 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
   // Announce mode switches (entering/leaving practice) once on mount.
   useEffect(() => {
     if (mountToast) showToast(mountToast);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Remind about a glowing Ember on the first open of the day. The
+  // once-per-day check runs inside the timeout so an unmounted (cancelled)
+  // reminder never burns the day's one showing.
+  useEffect(() => {
+    if (ephemeral || over || !emberAvailable) return;
+    const t = setTimeout(() => {
+      if (shouldRemindEmber(puzzle.day)) showToast('Your Ember is glowing — today’s hint is free.');
+    }, 700);
+    return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -239,7 +253,8 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
       return;
     }
 
-    if (melds <= HINT_COST) {
+    // The Ember pays for the hint instead of a meld.
+    if (!emberAvailable && melds <= HINT_COST) {
       showToast('Not enough melds to hint.', 'err');
       return;
     }
@@ -252,9 +267,15 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
     const clue = w.def ?? `starts with “${target.split('+')[0]}”`;
 
     setHints(h => [...h, { key: target, clue }]);
-    setMelds(melds - HINT_COST);
-    showToast('Clue revealed — 1 meld spent.');
-    if (!ephemeral) track('hint_used', { day: puzzle.day });
+    if (emberAvailable) {
+      setEmberAvailable(false);
+      consumeEmber();
+      showToast('Ember spent — this clue was free. 🔥');
+    } else {
+      setMelds(melds - HINT_COST);
+      showToast('Clue revealed — 1 meld spent.');
+    }
+    if (!ephemeral) track('hint_used', { day: puzzle.day, ember: emberAvailable });
   };
 
   const endGame = (won, currentFound) => {
@@ -271,7 +292,7 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
         hints_used: hints.length,
         player: stats.gamesPlayed === 0 ? 'new' : 'returning',
       });
-      setStats(recordResult(won));
+      setStats(recordResult(won, won && melds === START_MELDS));
     }
   };
 
@@ -339,6 +360,7 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
           theme={puzzle.theme}
           themeShimmer={themeShimmer}
           practice={practice}
+          ember={emberAvailable && !over}
           onHelp={onHelp}
           onWordmarkTap={onWordmarkTap}
         />
@@ -374,7 +396,7 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
                   Shuffle
                 </button>
                 <button className={`${SECONDARY_BTN} px-3.5 text-coral-deep border-[#e3c4be] bg-[#fdf5f3] flex items-center`} onClick={handleHint}>
-                  <LightbulbIcon /> Hint (-1 meld)
+                  <LightbulbIcon /> {emberAvailable ? 'Hint — free 🔥' : 'Hint (-1 meld)'}
                 </button>
                 <button className={`${SECONDARY_BTN} px-3.5`} onClick={handleClear}>
                   Clear
@@ -416,6 +438,7 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
           score={score}
           meldsLeft={melds}
           stats={stats}
+          emberEarned={!ephemeral && found.length === totalWords && melds === START_MELDS}
           shareText={shareText}
           canShare={canNativeShare()}
           onShare={shareResult}

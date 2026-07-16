@@ -4,6 +4,14 @@ export const LightbulbIcon = () => (
   </svg>
 );
 
+// The Ember: a small letterpress flame, amber over coral.
+export const FlameIcon = ({ className = 'inline-block', size = 13 }) => (
+  <svg width={size} height={size} viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <path d="M6 0.6 C6.7 2.1 8.6 3.3 9.3 5.1 A3.85 3.85 0 1 1 2.5 5.6 C2.6 3.7 5.1 2.5 6 0.6 Z" fill="#E8862B"/>
+    <path d="M6 4.6 C6.4 5.4 7.4 5.9 7.4 7 A1.6 1.6 0 1 1 4.5 7.1 C4.5 6.1 5.5 5.6 6 4.6 Z" fill="#F7C04A"/>
+  </svg>
+);
+
 export const KeyIcon = ({ className = 'block mx-auto' }) => (
   <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
     <g clipPath="url(#clip0_key)">
