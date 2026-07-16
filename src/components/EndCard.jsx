@@ -1,5 +1,5 @@
 import { PRIMARY_BTN } from './styles';
-import { FlameIcon } from './icons';
+import emberFlame from '../assets/ember.webp';
 
 export default function EndCard({ won, foundCount, totalWords, score, meldsLeft, stats, emberEarned, shareText, canShare, onShare, onCopy, onClose }) {
   return (
@@ -22,9 +22,9 @@ export default function EndCard({ won, foundCount, totalWords, score, meldsLeft,
         <div className="font-slab text-[44px] font-bold leading-none text-coral mb-1">{score}</div>
         <p className="text-[11px] tracking-[0.16em] uppercase text-muted font-bold m-0 mb-5">points</p>
         {emberEarned && (
-          <p className="flex items-center justify-center gap-1.5 text-[13px] font-semibold text-coral-deep bg-coral-mist border border-[#F0C9BE] rounded-lg py-2 px-3 m-0 mb-4">
-            <span className="animate-flicker inline-block shrink-0"><FlameIcon className="block" /></span>
-            <span>You earned an <b>Ember</b> — tomorrow&rsquo;s hint is free.</span>
+          <p className="flex items-center justify-center gap-1.5 text-[13px] text-coral-deep m-0 mb-4">
+            <img src={emberFlame} alt="" className="w-[18px] h-[18px] shrink-0" />
+            <span>Ember earned — tomorrow&rsquo;s hint is free.</span>
           </p>
         )}
         <p className="text-[14px] text-ink-soft m-0 mb-1">

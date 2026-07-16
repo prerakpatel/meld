@@ -1,4 +1,4 @@
-import { FlameIcon } from './icons';
+import emberFlame from '../assets/ember.webp';
 
 const MONTHS = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
 
@@ -37,9 +37,12 @@ export default function Header({ meldsLeft, totalMelds, score, dayNumber, theme,
               ></span>
             ))}
             {ember && (
-              <span className="animate-flicker ml-0.5" title="Your Ember — today's hint is free">
-                <FlameIcon className="block" />
-              </span>
+              <img
+                src={emberFlame}
+                alt="Your Ember — today's hint is free"
+                title="Your Ember — today's hint is free"
+                className="w-4 h-4 ml-0.5"
+              />
             )}
           </div>
         </div>

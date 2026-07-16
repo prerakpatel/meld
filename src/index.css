@@ -28,7 +28,6 @@
   --animate-shake: shake 0.4s ease;
   --animate-pop: pop 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.4);
   --animate-themein: themein 1.8s ease both;
-  --animate-flicker: flicker 1.8s ease-in-out infinite;
   --animate-nudge-r: nudge-r 3.6s ease-in-out infinite;
   --animate-nudge-l: nudge-l 3.6s ease-in-out infinite;
   --animate-fade-blink: fade-blink 3.6s ease-in-out infinite;
@@ -138,13 +137,6 @@
   0% { opacity: 0; transform: translateY(4px); color: var(--color-coral-deep); }
   40% { opacity: 1; transform: translateY(0); color: var(--color-coral-deep); }
   100% { color: inherit; }
-}
-
-/* The Ember's gentle flicker. */
-@keyframes flicker {
-  0%, 100% { transform: scale(1) rotate(-2deg); opacity: 0.9; }
-  30% { transform: scale(1.1) rotate(2deg); opacity: 1; }
-  60% { transform: scale(0.94) rotate(-1deg); opacity: 0.85; }
 }
 
 /* How-to-play demo: the two chunks drift together (the + gives way), the
