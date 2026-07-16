@@ -33,6 +33,15 @@ npm run puzzles:pack
 
 Then commit and push — Vercel redeploys automatically.
 
+## Analytics (Umami Cloud)
+
+Anonymous, cookie-free, and **inert until configured** — the game runs identically with no analytics at all.
+
+1. Create a free account at [cloud.umami.is](https://cloud.umami.is) → Add website → `meld.bythesquare.app` → copy the **Website ID**.
+2. In Vercel: Project → Settings → Environment Variables → add `VITE_UMAMI_WEBSITE_ID` = that ID → redeploy.
+
+Dashboard then shows visitors, visits, average time, plus custom events: `game_finished` (result, day, melds_left, hints_used, player new/returning — self-reported by the device, no user tracking), `hint_used`, and `share` (native vs copy). Practice games and dev previews are never tracked; local dev never loads the script.
+
 ## Testing tricks
 
 - **Creator practice mode** — tap the MELD wordmark 7 times quickly to toggle unlimited random puzzles. Nothing in the UI or URL reveals it, and it never touches the real daily game, saved progress, or streak. Tap 7 times again to return to today.

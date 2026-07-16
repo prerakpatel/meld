@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { loadGameState, saveGameState, loadStats, recordResult, shouldGreetTheme } from '../lib/storage';
+import { track } from '../lib/analytics';
 import Header from './Header';
 import MeldConsole from './MeldConsole';
 import TileGrid from './TileGrid';
@@ -253,13 +254,25 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
     setHints(h => [...h, { key: target, clue }]);
     setMelds(melds - HINT_COST);
     showToast('Clue revealed — 1 meld spent.');
+    if (!ephemeral) track('hint_used', { day: puzzle.day });
   };
 
   const endGame = (won, currentFound) => {
     setOver(true);
     setShowEndCard(true);
     setRevealed(wordOrder.filter(k => !currentFound.includes(k)));
-    if (!ephemeral) setStats(recordResult(won));
+    if (!ephemeral) {
+      // `stats` still holds pre-game numbers here, so gamesPlayed === 0
+      // means this device just finished its very first game.
+      track('game_finished', {
+        result: won ? 'won' : 'lost',
+        day: puzzle.day,
+        melds_left: won ? melds : 0,
+        hints_used: hints.length,
+        player: stats.gamesPlayed === 0 ? 'new' : 'returning',
+      });
+      setStats(recordResult(won));
+    }
   };
 
   // Share card, kept deliberately minimal: a one-word verdict (which still
@@ -285,7 +298,10 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
   const copyResult = () => {
     if (navigator.clipboard) {
       navigator.clipboard.writeText(`${shareText}\n${SHARE_URL}`)
-        .then(() => showToast('Copied!', 'good'))
+        .then(() => {
+          showToast('Copied!', 'good');
+          if (!ephemeral) track('share', { method: 'copy', day: puzzle.day });
+        })
         .catch(() => showToast('Copy failed', 'err'));
     } else {
       showToast('Copy not supported on this browser', 'err');
@@ -298,6 +314,7 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
     if (!canNativeShare()) return copyResult();
     try {
       await navigator.share({ text: shareText, url: SHARE_URL });
+      if (!ephemeral) track('share', { method: 'native', day: puzzle.day });
     } catch (err) {
       // Dismissing the sheet isn't a failure worth reporting.
       if (err?.name === 'AbortError') return;
