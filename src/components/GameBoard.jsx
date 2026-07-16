@@ -13,6 +13,14 @@ const PTS_PER_WORD = 20;
 const PTS_KEYSTONE = 15;
 const HINT_COST = 1;
 
+const SHARE_URL = 'https://meld.bythesquare.app';
+
+// Mobile browsers open the OS share sheet; desktop ones mostly don't, and
+// fall back to the clipboard.
+function canNativeShare() {
+  return typeof navigator !== 'undefined' && typeof navigator.share === 'function';
+}
+
 // One full game of MELD. Remounted (via key) when the puzzle changes —
 // entering/leaving practice or dealing a new practice puzzle.
 // `ephemeral` games never save progress or touch the streak.
@@ -272,13 +280,28 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
     return `MELD #${puzzle.day} · ${verdict}\n${grid} ${found.length}/${totalWords} words`;
   }, [puzzle, wordOrder, validWords, found, totalWords, melds]);
 
+  // Pasting plain text can't unfurl a preview, so the copied version carries
+  // the link as a last line; the native share sheet passes it separately.
   const copyResult = () => {
     if (navigator.clipboard) {
-      navigator.clipboard.writeText(shareText)
+      navigator.clipboard.writeText(`${shareText}\n${SHARE_URL}`)
         .then(() => showToast('Copied!', 'good'))
         .catch(() => showToast('Copy failed', 'err'));
     } else {
       showToast('Copy not supported on this browser', 'err');
+    }
+  };
+
+  // The OS share sheet: the result plus the link, which unfurls into the
+  // MELD preview card in Messages, WhatsApp, and social apps.
+  const shareResult = async () => {
+    if (!canNativeShare()) return copyResult();
+    try {
+      await navigator.share({ text: shareText, url: SHARE_URL });
+    } catch (err) {
+      // Dismissing the sheet isn't a failure worth reporting.
+      if (err?.name === 'AbortError') return;
+      copyResult();
     }
   };
 
@@ -377,6 +400,8 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
           meldsLeft={melds}
           stats={stats}
           shareText={shareText}
+          canShare={canNativeShare()}
+          onShare={shareResult}
           onCopy={copyResult}
           onClose={() => setShowEndCard(false)}
         />

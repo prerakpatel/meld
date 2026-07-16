@@ -1,6 +1,6 @@
 import { PRIMARY_BTN } from './styles';
 
-export default function EndCard({ won, foundCount, totalWords, score, meldsLeft, stats, shareText, onCopy, onClose }) {
+export default function EndCard({ won, foundCount, totalWords, score, meldsLeft, stats, shareText, canShare, onShare, onCopy, onClose }) {
   return (
     <>
       <div className="fixed inset-0 bg-[rgba(237,232,223,0.85)] backdrop-blur-sm z-50 animate-fade-in" onClick={onClose} />
@@ -30,9 +30,23 @@ export default function EndCard({ won, foundCount, totalWords, score, meldsLeft,
         <div className="font-mono text-[15px] tracking-widest bg-white/60 border border-dashed border-tile-edge rounded-xl p-3.5 mb-5 whitespace-pre-line text-left">
           {shareText}
         </div>
-        <button className={`${PRIMARY_BTN} font-slab text-lg px-6 py-3`} onClick={onCopy}>
-          Copy result
-        </button>
+        {canShare ? (
+          <>
+            <button className={`${PRIMARY_BTN} text-lg px-6 py-3`} onClick={onShare}>
+              Share result
+            </button>
+            <button
+              className="mt-3 mx-auto block bg-transparent border-none cursor-pointer text-[13px] font-semibold text-muted underline underline-offset-2 hover:text-ink-soft"
+              onClick={onCopy}
+            >
+              Copy instead
+            </button>
+          </>
+        ) : (
+          <button className={`${PRIMARY_BTN} text-lg px-6 py-3`} onClick={onCopy}>
+            Copy result
+          </button>
+        )}
       </div>
     </>
   );
