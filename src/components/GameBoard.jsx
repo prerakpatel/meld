@@ -26,7 +26,7 @@ function canNativeShare() {
 // One full game of MELD. Remounted (via key) when the puzzle changes —
 // entering/leaving practice or dealing a new practice puzzle.
 // `ephemeral` games never save progress or touch the streak.
-export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onHelp, onWordmarkTap, onNewPractice }) {
+export default function GameBoard({ puzzle, now, ephemeral, practice, mountToast, onHelp, onWordmarkTap, onNewPractice }) {
   const saved = useMemo(
     () => (ephemeral ? null : loadGameState(puzzle.day)),
     [puzzle, ephemeral],
@@ -35,7 +35,7 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
   // Play the theme's settle-in shimmer only on the first view of a new day.
   const [themeShimmer] = useState(() => !ephemeral && !!puzzle.theme && shouldGreetTheme(puzzle.day));
   // The Ember: earned by a flawless day, it makes today's hint free.
-  const [emberAvailable, setEmberAvailable] = useState(() => !ephemeral && hasEmberToday());
+  const [emberAvailable, setEmberAvailable] = useState(() => !ephemeral && hasEmberToday(now));
 
   // Derived puzzle state
   const { validWords, wordOrder, totalWords } = useMemo(() => {
@@ -270,7 +270,7 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
     setHints(h => [...h, { key: target, clue }]);
     if (emberAvailable) {
       setEmberAvailable(false);
-      consumeEmber();
+      consumeEmber(now);
       showToast('Ember spent — this clue was free. 🔥');
     } else {
       setMelds(melds - HINT_COST);
@@ -293,7 +293,7 @@ export default function GameBoard({ puzzle, ephemeral, practice, mountToast, onH
         hints_used: hints.length,
         player: stats.gamesPlayed === 0 ? 'new' : 'returning',
       });
-      setStats(recordResult(won, won && melds === START_MELDS));
+      setStats(recordResult(won, won && melds === START_MELDS, now));
     }
   };
 
