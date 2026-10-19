@@ -49,8 +49,13 @@
     --tile-h: 3.25rem;     /* bank tiles */
     --tile-fs: 17px;       /* bank tile lettering */
     --btn-h: 3rem;         /* Meld button */
-    --seed-h: 2rem;        /* ledger seeds and pills */
+    --seed-h: 2rem;        /* ledger seats */
+    --seat-fs: 12px;       /* ledger word lettering */
     --gap-y: 0.625rem;     /* vertical rhythm between sections */
+  }
+
+  @media (min-width: 380px) {
+    :root { --seat-fs: 13px; }
   }
 
   @supports (height: 1svh) {

@@ -8,7 +8,7 @@ An original game from **By The Square** · Created by **Prerak Patel** · [meld.
 ## How it works
 
 - Fully static React app (Vite + Tailwind). No backend, no accounts, no network calls.
-- 457 daily puzzles (~15 months) ship inside the app, lightly obfuscated (`src/data/puzzles.data.js`), each with hint definitions and a fairness-checked chunk pool. Days with a genuine shared theme carry a label; the rest show the date.
+- 447 daily puzzles (~15 months) ship inside the app, lightly obfuscated (`src/data/puzzles.data.js`), each with hint definitions and a fairness-checked chunk pool. Days with a genuine shared theme carry a label; the rest show the date.
 - Player progress, streaks, and stats live in the browser's localStorage only.
 - The daily puzzle is picked by the player's local calendar date, like Wordle.
 
@@ -19,6 +19,7 @@ An original game from **By The Square** · Created by **Prerak Patel** · [meld.
 | `npm run dev` | Local dev server |
 | `npm run build` | Production build (what Vercel runs) |
 | `npm run lint` | Lint |
+| `npm run puzzles:audit` | Checks every puzzle: 8 chunks of 3–4 letters, 5 words, 1 keystone, no real-word traps |
 | `npm run puzzles:pack` | Re-bundle `scripts/generated_puzzles.json` into the app (run after regenerating puzzles) |
 
 ## Maintenance: topping up puzzles
@@ -29,6 +30,7 @@ Puzzles are generated offline by `scripts/generate_puzzles.mjs`, hint clues by `
 node scripts/generate_puzzles.mjs
 node scripts/build_definitions.mjs
 npm run puzzles:pack
+npm run puzzles:audit
 ```
 
 Then commit and push — Vercel redeploys automatically.

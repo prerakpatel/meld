@@ -33,6 +33,19 @@ for (const p of ['/usr/share/dict/words', new URL('./common_words_10k.txt', impo
     if (/^[a-z]{5,}$/.test(word)) dict.add(word);
   }
 }
+// WordNet (a dev dependency, already used for hint clues) is the broad
+// net: it catches genuine words like CASEBOOK or HERMIT that the common-word
+// list misses, so no real word can ever cost a player a meld.
+const wnDir = new URL('../node_modules/wordnet-db/dict/', import.meta.url);
+for (const f of ['index.noun', 'index.verb', 'index.adj', 'index.adv']) {
+  const path = new URL(f, wnDir);
+  if (!fs.existsSync(path)) continue;
+  for (const line of fs.readFileSync(path, 'utf8').split('\n')) {
+    if (!line || line.startsWith(' ')) continue;
+    const word = line.split(' ')[0];
+    if (/^[a-z]{5,}$/.test(word)) dict.add(word);
+  }
+}
 if (dict.size < 10000) throw new Error('dictionary sources missing — refusing to pack without the real-word list');
 
 for (const d of puzzles) {

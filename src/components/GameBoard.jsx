@@ -366,9 +366,23 @@ export default function GameBoard({ puzzle, now, ephemeral, practice, mountToast
           onWordmarkTap={onWordmarkTap}
         />
 
-        {/* Leftover height splits 1:2 above/below the play block (the console
-            rides high, near the header), and the block's own rhythm scales
-            with the viewport via --gap-y. */}
+        {/* The ledger sits in the upper half, near the score, where the
+            eye lands to check progress. The play block (console, tiles,
+            buttons) is anchored low, in thumb reach; any spare height on
+            taller phones is shared evenly around the ledger. */}
+        <div className="flex-1 min-h-(--gap-y)" />
+        <div>
+          <TodaysFive
+            wordOrder={wordOrder}
+            validWords={validWords}
+            found={found}
+            revealed={revealed}
+            hintedKeys={hints.map(h => h.key)}
+            onSeatTap={(isKey) => showToast(isKey
+              ? 'The keystone’s seat — find it for a bonus.'
+              : 'One of today’s five lives here — meld it to fill the seat.')}
+          />
+        </div>
         <div className="flex-1 min-h-2.5" />
         <div className="flex flex-col gap-(--gap-y)">
           <MeldConsole
@@ -392,9 +406,9 @@ export default function GameBoard({ puzzle, now, ephemeral, practice, mountToast
           <div className="flex gap-2 justify-center mt-1.5">
             {!over ? (
               <>
-                <button className={`${SECONDARY_BTN} px-3.5 flex items-center`} onClick={handleShuffle}>
-                  <span className="material-symbols-rounded text-[15px] leading-none mr-1" aria-hidden="true">shuffle</span>
-                  Shuffle
+                <button className={`${SECONDARY_BTN} px-3.5 flex items-center`} onClick={handleShuffle} aria-label="Shuffle tiles">
+                  <span className="material-symbols-rounded text-[15px] leading-none min-[360px]:mr-1" aria-hidden="true">shuffle</span>
+                  <span className="max-[359px]:sr-only">Shuffle</span>
                 </button>
                 <button className={`${SECONDARY_BTN} px-3.5 text-coral-deep border-[#e3c4be] bg-[#fdf5f3] flex items-center`} onClick={handleHint}>
                   <LightbulbIcon /> {emberAvailable ? (
@@ -419,18 +433,6 @@ export default function GameBoard({ puzzle, now, ephemeral, practice, mountToast
             )}
           </div>
         </div>
-        <div className="flex-[2] min-h-2.5" />
-
-        <TodaysFive
-          wordOrder={wordOrder}
-          validWords={validWords}
-          found={found}
-          revealed={revealed}
-          hintedKeys={hints.map(h => h.key)}
-          onSeatTap={(isKey) => showToast(isKey
-            ? 'The keystone’s seat — find it for a bonus.'
-            : 'One of today’s five lives here — meld it to fill the seat.')}
-        />
       </div>
 
       {showEndCard && (
